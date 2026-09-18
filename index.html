@@ -1,0 +1,347 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ENGLISH C1-C2 ACCELERATOR</title>
+    
+    <!-- Подключение единой дизайн-системы и Telegram SDK -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tma-bridge.js"></script>
+</head>
+<body>
+
+    <div class="container" style="max-width: 860px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- Top Header -->
+        <div class="header" style="position: relative; padding: 12px 0; border-bottom: 1px solid var(--card-border); background: transparent; backdrop-filter: none;">
+            <div style="font-size: 1.25rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: -0.02em;">
+                ⚡ C1-C2 ACCELERATOR
+            </div>
+            <div style="background: var(--gold-bg); border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 4px;">
+                🔥 День 1
+            </div>
+        </div>
+
+        <!-- Hero Card -->
+        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
+            <div style="font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 6px; position: relative; z-index: 2;">Инженерная система языка</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; max-width: 600px; position: relative; z-index: 2;">
+                Полная экосистема из 10 интерактивных модулей: от нулевого алфавита и жестких скелетов синтаксиса до риторики уровня TED Talks, 228 письменных заданий и 30 живых переписок.
+            </div>
+            <!-- Декоративный блик -->
+            <div style="position: absolute; top: -50%; right: -20%; width: 250px; height: 250px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
+        </div>
+
+        <!-- Daily Habit Checklist -->
+        <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.95rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">🎯 План тренировки на сегодня:</div>
+                <span id="habitProgressText" style="font-size: 0.75rem; color: var(--pos); font-weight: 700;">0 / 4 выполнено</span>
+            </div>
+            <div style="height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden;">
+                <div id="habitFill" style="height: 100%; width: 0%; background: var(--pos); transition: width 0.3s ease;"></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+                <button id="h1" onclick="toggleHabit(1)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
+                    <span id="h1_icon">⬜</span> 1. Словарь Oxford
+                </button>
+                <button id="h2" onclick="toggleHabit(2)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
+                    <span id="h2_icon">⬜</span> 2. Каркас синтаксиса
+                </button>
+                <button id="h3" onclick="toggleHabit(3)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
+                    <span id="h3_icon">⬜</span> 3. Тренажер письма
+                </button>
+                <button id="h4" onclick="toggleHabit(4)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
+                    <span id="h4_icon">⬜</span> 4. Живые диалоги
+                </button>
+            </div>
+        </div>
+
+        <!-- 1. ПРАКТИКА И ТРЕНАЖЕРЫ -->
+        <div class="section-title">⚡ Главные тренажеры автоматизма:</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('meng.html', 'Живые диалоги')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--cyan-bg); color: var(--cyan);">Интерактив</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">💬</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Тренажер диалогов</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">30 жизненных сценариев</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Реальные бытовые переписки (аренда, маркетплейс, авто, отель, полиция) с подсказками.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Открыть диалоги</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('reng.html', 'Тренажер письма')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--gold-bg); color: var(--gold);">Практика</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">✍️</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Активное письмо</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">228 заданий</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Активное воспроизведение: письмо ручкой в тетради и набор на клавиатуре с автопроверкой.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Начать практику</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('weng.html', 'Словарь Oxford 10k')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--pos-bg); color: var(--pos);">База слов</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">📚</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Лексикон Oxford</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">A1–C2 + Идиомы</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Сотни слов, 3 формы глаголов, живой поиск и режим проверки памяти (скрытие перевода).</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Учить слова</span> <span>→</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 2. СТАРТ И БАЗОВАЯ ГРАММАТИКА -->
+        <div class="section-title">🌱 Фундамент и Скелеты (A0–B1):</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('heng.html', 'Фонетика и база')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--pos-bg); color: var(--pos);">Старт с нуля</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">📘</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Букварь & Звуки</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">Алфавит и правила</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Интерактивный алфавит A-Z, коварные звуки TH/W/V, немые буквы, числа и дни недели.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Открыть букварь</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng.html', 'Синтаксис A1-A2')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--primary-bg); color: var(--primary);">Скелеты</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">📐</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Каркас предложений</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">8 базовых модулей</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Железный порядок слов SVO, глагол To Be, времена Simple, Continuous, Perfect и условия.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Заучить скелеты</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng1.html', 'Лексикон и предлоги')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--primary-bg); color: var(--primary);">Топливо</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">⛽</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Местоимения & Времена</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">8 модулей связок</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Матрица местоимений (I/Me/My), предлоги времени AT/ON/IN, предлоги места и топ-глаголы.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Освоить базу</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng2.html', 'Разговорная беглость')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--gold-bg); color: var(--gold);">Беглость</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">⚡</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Фразовые & DO vs MAKE</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">8 модулей практики</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Топ фразовых глаголов, филлеры для пауз (Actually, To be honest), герундий и битва DO vs MAKE.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Убрать ступор</span> <span>→</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 3. ВЫСШИЙ ПИЛОТАЖ C1-C2 -->
+        <div class="section-title">👑 Прорыв в C1–C2 (Продвинутый уровень):</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng3.html', 'Язык дипломатии')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--purple-bg); color: var(--purple);">B2–C1</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">💎</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Инверсия & Дипломатия</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">8 модулей риторики</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Инверсия ораторов (Not only did we), смешанные условия, язык мягких переговоров и каузатив.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Смотреть модуль</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng4.html', 'Мастерство синтаксиса')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--purple-bg); color: var(--purple);">B2</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">🎯</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">Used to, Wish & Сжатие</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">8 модулей мастерства</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Тройка Used to, сожаления Wish, деепричастия, хвостики Tag Questions и Cleft Sentences.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Смотреть модуль</span> <span>→</span>
+                </div>
+            </div>
+
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng5.html', 'Риторика C1-C2')">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--rose-bg); color: var(--rose);">C1–C2 Master</span>
+                    <span style="font-size: 1.8rem; line-height: 1;">👑</span>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #fff; margin-top: 4px;">TED Talk & Номинализация</div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px;">8 модулей высшего стиля</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">Эллипсис, стилистический фронтинг, академическая номинализация, биномы и литота.</div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--primary); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                    <span>Овладеть C2</span> <span>→</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- In-App Fullscreen Modal Viewer -->
+    <div style="display: none; position: fixed; inset: 0; background: #000; z-index: 9999; flex-direction: column;" id="frameOverlay">
+        <div style="height: calc(50px + var(--sa-t)); padding-top: var(--sa-t); background: #111827; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; padding-left: calc(16px + var(--sa-l)); padding-right: calc(16px + var(--sa-r));">
+            <div style="font-size: 0.9rem; font-weight: 800; color: #fff;" id="frameTitle">Модуль</div>
+            <div style="display: flex; gap: 8px;">
+                <button style="background: #1f2937; border: 1px solid var(--card-border); color: #f8fafc; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;" onclick="openInNewTab()">В браузере ↗</button>
+                <button style="background: var(--primary); border: none; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;" onclick="closeModule()">✕ Закрыть</button>
+            </div>
+        </div>
+        <iframe id="appFrame" style="width: 100%; height: calc(100% - 50px - var(--sa-t)); border: none; background: var(--bg-color);" src="about:blank"></iframe>
+    </div>
+
+    <script>
+        let currentLoadedUrl = '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Скрываем кнопку "Назад" на главном экране
+            if (typeof TMABridge !== 'undefined') {
+                TMABridge.hideBackButton();
+            }
+            updateHabitProgress();
+        });
+
+        function openModule(url, title) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            currentLoadedUrl = url;
+            document.getElementById('frameTitle').innerText = title;
+            document.getElementById('appFrame').src = url;
+            document.getElementById('frameOverlay').style.display = 'flex';
+            
+            // Показываем нативную кнопку "Назад" в Telegram, чтобы закрыть iframe
+            if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
+                window.Telegram.WebApp.BackButton.show();
+                // Привязываем закрытие модуля к нативной кнопке
+                window.Telegram.WebApp.BackButton.onClick(closeModuleNative);
+            }
+        }
+
+        function closeModuleNative() {
+            closeModule();
+        }
+
+        function closeModule() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            document.getElementById('frameOverlay').style.display = 'none';
+            document.getElementById('appFrame').src = 'about:blank';
+            
+            // Скрываем нативную кнопку "Назад" и убираем обработчик
+            if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
+                window.Telegram.WebApp.BackButton.hide();
+                window.Telegram.WebApp.BackButton.offClick(closeModuleNative);
+            }
+        }
+
+        function openInNewTab() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            if (currentLoadedUrl) {
+                window.open(currentLoadedUrl, '_blank');
+            }
+        }
+
+        // HABIT TRACKER & LOCAL STORAGE
+        function toggleHabit(num) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('medium');
+            const btn = document.getElementById(`h${num}`);
+            const icon = document.getElementById(`h${num}_icon`);
+            
+            // Toggle styles
+            let isDone = false;
+            if (btn.style.background === 'var(--pos-bg)') {
+                btn.style.background = '#111827';
+                btn.style.borderColor = 'var(--card-border)';
+                btn.style.color = 'var(--text-muted)';
+                isDone = false;
+            } else {
+                btn.style.background = 'var(--pos-bg)';
+                btn.style.borderColor = 'var(--pos)';
+                btn.style.color = '#fff';
+                isDone = true;
+            }
+            
+            icon.innerText = isDone ? '✅' : '⬜';
+            localStorage.setItem(`eng_habit_${num}`, isDone ? 'true' : 'false');
+            updateHabitProgress();
+        }
+
+        function updateHabitProgress() {
+            let done = 0;
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`h${i}`);
+                const icon = document.getElementById(`h${i}_icon`);
+                if (localStorage.getItem(`eng_habit_${i}`) === 'true') {
+                    done++;
+                    btn.style.background = 'var(--pos-bg)';
+                    btn.style.borderColor = 'var(--pos)';
+                    btn.style.color = '#fff';
+                    icon.innerText = '✅';
+                } else {
+                    btn.style.background = '#111827';
+                    btn.style.borderColor = 'var(--card-border)';
+                    btn.style.color = 'var(--text-muted)';
+                    icon.innerText = '⬜';
+                }
+            }
+
+            const pct = (done / 4) * 100;
+            document.getElementById('habitFill').style.width = `${pct}%`;
+            document.getElementById('habitProgressText').innerText = `${done} / 4 выполнено`;
+
+            if (done === 4) {
+                document.getElementById('habitProgressText').innerText = '🎉 План на сегодня выполнен!';
+            }
+        }
+    </script>
+</body>
+</html>

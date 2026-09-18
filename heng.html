@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Букварь и Фонетический справочник</title>
+    
+    <!-- Подключение единой дизайн-системы и Telegram SDK -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tma-bridge.js"></script>
+
+    <style>
+        /* Уникальная сетка алфавита и таблицы для букваря */
+        .abc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+            gap: 10px;
+        }
+
+        .letter-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.15s;
+            text-align: center;
+        }
+        .letter-card:active {
+            transform: scale(0.96);
+            border-color: var(--primary);
+        }
+
+        .char-main {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .char-phonetic {
+            font-size: 0.75rem;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .char-ru {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .char-example {
+            margin-top: 6px;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #60a5fa;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .word-tag {
+            display: inline-block;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.12);
+            border-bottom: 1px dashed rgba(96, 165, 250, 0.4);
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+        .word-tag:active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .kit-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+        .kit-table th {
+            text-align: left;
+            padding: 8px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+        .kit-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+        }
+
+        .system-step {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .step-num {
+            background: var(--primary);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .section-view {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .section-view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body style="overflow-y: auto; height: auto;">
+
+    <!-- Sticky Header -->
+    <div class="header" style="position: sticky; height: auto; padding: 12px 16px; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div style="font-size: 1.15rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                📘 Букварь & Фонетика
+            </div>
+            <span style="font-size: 0.75rem; color: var(--gold); font-weight: 700;">A0 → C2</span>
+        </div>
+
+        <div style="display: flex; gap: 6px; overflow-x: auto; width: 100%; padding-bottom: 2px;">
+            <div class="counter active" id="tabBtn_tabAbc" style="cursor:pointer; white-space:nowrap;" onclick="switchTab('tabAbc', this)">🔤 Алфавит (A-Z)</div>
+            <div class="counter" id="tabBtn_tabPhonics" style="cursor:pointer; white-space:nowrap; background:#172338; color:var(--text-muted);" onclick="switchTab('tabPhonics', this)">🗣️ Звуки и ловушки</div>
+            <div class="counter" id="tabBtn_tabKit" style="cursor:pointer; white-space:nowrap; background:#172338; color:var(--text-muted);" onclick="switchTab('tabKit', this)">🔢 Числа и дни</div>
+            <div class="counter" id="tabBtn_tabHacks" style="cursor:pointer; white-space:nowrap; background:#172338; color:var(--text-muted);" onclick="switchTab('tabHacks', this)">💡 Спецназ-советы</div>
+            <div class="counter" id="tabBtn_tabSystem" style="cursor:pointer; white-space:nowrap; background:#172338; color:var(--text-muted);" onclick="switchTab('tabSystem', this)">🗺️ Карта курса</div>
+        </div>
+    </div>
+
+    <div style="max-width: 800px; margin: 0 auto; padding: 16px; padding-bottom: 80px;">
+
+        <!-- TAB 1: ALPHABET (DEMO: ДОСТУПНО) -->
+        <div id="tabAbc" class="section-view active">
+            <div class="note" style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 8px;">
+                💡 <b>Как тренироваться:</b> Нажмите на карточку буквы, чтобы услышать её алфавитное имя. Нажмите на слово внизу карточки, чтобы прослушать произношение слова.
+            </div>
+
+            <div class="abc-grid" id="abcGrid"></div>
+        </div>
+
+        <!-- TAB 2: PHONICS & TRAPS (DEMO: ДОСТУПНО) -->
+        <div id="tabPhonics" class="section-view">
+            
+            <div class="card">
+                <div class="card-header">🎯 1. Главный секрет звука TH ([θ] и [ð])</div>
+                <div class="note">
+                    В русском языке таких звуков нет вообще! Ни в коем случае не заменяйте их на «С» или «З».<br>
+                    <b>Положение рта:</b> Высуньте кончик языка <i>между зубами</i> и выдохните воздух.
+                    <div style="background: rgba(0,0,0,0.3); border-left: 4px solid var(--primary); padding: 10px 12px; border-radius: 8px; margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                        <div><b>Глухой [θ] (как ветерок сквозь зубы):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('think')">think</span> (думать)
+                            <span class="word-tag" onclick="speak('thanks')">thanks</span> (спасибо)
+                            <span class="word-tag" onclick="speak('three')">three</span> (три)
+                        </div>
+                        <div style="margin-top: 6px;"><b>Звонкий [ð] (с голосом, язык щекочет зубы):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('this')">this</span> (этот)
+                            <span class="word-tag" onclick="speak('that')">that</span> (тот)
+                            <span class="word-tag" onclick="speak('they')">they</span> (они)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">👄 2. Битва звуков: W против V</div>
+                <div class="note">
+                    Русские люди произносят оба звука одинаково, как «В». Для носителей это звучит катастрофично (<i>wet</i> превращается в <i>vet</i>!).
+                    <div style="background: rgba(0,0,0,0.3); border-left: 4px solid var(--primary); padding: 10px 12px; border-radius: 8px; margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                        <div><b>Звук W [w] (Губы в трубочку, зубы НЕ касаются губ):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('water')">water</span> (вода)
+                            <span class="word-tag" onclick="speak('window')">window</span> (окно)
+                            <span class="word-tag" onclick="speak('work')">work</span> (работа)
+                        </div>
+                        <div style="margin-top: 6px;"><b>Звук V [v] (Верхние зубы прижимают нижнюю губу):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('voice')">voice</span> (голос)
+                            <span class="word-tag" onclick="speak('very')">very</span> (очень)
+                            <span class="word-tag" onclick="speak('visit')">visit</span> (визит)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🤫 3. Немые буквы (Коварные согласные)</div>
+                <div class="note">
+                    В английском пишется много букв, которые исторически перестали читаться. Их нужно запомнить:
+                    <div style="background: rgba(0,0,0,0.3); border-left: 4px solid var(--primary); padding: 10px 12px; border-radius: 8px; margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                        <div><b>Немая K перед N (K не читается!):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('know')">know</span> [ноу]
+                            <span class="word-tag" onclick="speak('knife')">knife</span> [найф]
+                            <span class="word-tag" onclick="speak('knee')">knee</span> [ни]
+                        </div>
+                        <div style="margin-top: 6px;"><b>Немая B перед T или после M:</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('doubt')">doubt</span> [даут] (сомнение)
+                            <span class="word-tag" onclick="speak('climb')">climb</span> [клайм] (лезть)
+                        </div>
+                        <div style="margin-top: 6px;"><b>Немая S и P:</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('island')">island</span> [айлэнд] (остров)
+                            <span class="word-tag" onclick="speak('receipt')">receipt</span> [рисит] (чек)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🚪 4. Открытый и закрытый слог</div>
+                <div class="note">
+                    Гласная читается так же, как называется в алфавите, если на конце слова стоит «немая буква E» (открытый слог):
+                    <div style="background: rgba(0,0,0,0.3); border-left: 4px solid var(--primary); padding: 10px 12px; border-radius: 8px; margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                        <div><b>Закрытый слог (короткий звук):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('cat')">cat [æ]</span> (кот)
+                            <span class="word-tag" onclick="speak('pin')">pin [ɪ]</span> (булавка)
+                            <span class="word-tag" onclick="speak('not')">not [ɒ]</span> (не)
+                        </div>
+                        <div style="margin-top: 6px;"><b>Открытый слог (с буквой E на конце):</b></div>
+                        <div>
+                            <span class="word-tag" onclick="speak('cake')">cake [eɪ]</span> (торт)
+                            <span class="word-tag" onclick="speak('pine')">pine [aɪ]</span> (сосна)
+                            <span class="word-tag" onclick="speak('note')">note [oʊ]</span> (заметка)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 3: SURVIVAL KIT (PAYWALL ЗАБЛОКИРУЕТ ПЕРЕКЛЮЧЕНИЕ СЮДА) -->
+        <div id="tabKit" class="section-view">
+            
+            <div class="card">
+                <div class="card-header">📅 Дни недели и части суток</div>
+                <table class="kit-table">
+                    <tr><th>День недели</th><th>Произношение</th><th>Предлог</th></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Monday')">Monday</span></td><td>Понедельник</td><td><b>ON</b> Monday</td></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Tuesday')">Tuesday</span></td><td>Вторник</td><td><b>ON</b> Tuesday</td></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Wednesday')">Wednesday</span></td><td>Среда [вэнздэй]</td><td><b>ON</b> Wednesday</td></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Thursday')">Thursday</span></td><td>Четверг [сёрздэй]</td><td><b>ON</b> Thursday</td></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Friday')">Friday</span></td><td>Пятница</td><td><b>ON</b> Friday</td></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Saturday')">Saturday</span></td><td>Суббота</td><td><b>ON</b> Saturday</td></tr>
+                    <tr><td><span class="word-tag" onclick="speak('Sunday')">Sunday</span></td><td>Воскресенье</td><td><b>ON</b> Sunday</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🔢 Числа: Десятки и созвучия (-TEEN vs -TY)</div>
+                <div class="note">
+                    Главная путаница на слух: ударение в подростковых числах (13–19) падает на <b>-TEEN</b> (долгий звук), а в десятках — на первый слог (<b>-TY</b> звучит коротко):
+                    <div style="background: rgba(0,0,0,0.3); border-left: 4px solid var(--gold); padding: 10px 12px; border-radius: 8px; margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div><span class="word-tag" onclick="speak('thirteen')">13 - thirteen</span> [сёр-ТИИН]</div>
+                            <div><span class="word-tag" onclick="speak('thirty')">30 - thirty</span> [СЁР-ти]</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div><span class="word-tag" onclick="speak('fourteen')">14 - fourteen</span> [фор-ТИИН]</div>
+                            <div><span class="word-tag" onclick="speak('forty')">40 - forty</span> [ФОР-ти]</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div><span class="word-tag" onclick="speak('fifteen')">15 - fifteen</span> [фиф-ТИИН]</div>
+                            <div><span class="word-tag" onclick="speak('fifty')">50 - fifty</span> [ФИФ-ти]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 4: HACKS & STUDY METHODOLOGY -->
+        <div id="tabHacks" class="section-view">
+            
+            <div class="card">
+                <div class="card-header">🧠 1. Правило «Zero Translation» (Отказ от перевода)</div>
+                <div class="note">
+                    Самый большой тормоз в речи — когда человек сначала думает на русском: <i>«Вчера ко мне пришел друг... так, вчера это yesterday, ко мне это to me...»</i>.<br><br>
+                    <b>Решение:</b> Приучите себя думать <b>готовыми скелетами</b> (S-V-O-P-T). Вы не переводите слова, вы сразу берете нужную ячейку: <code>[My friend] + [came] + [to me] + [yesterday]</code>.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">🗣️ 2. Метод «Shadowing» (Теневой повтор)</div>
+                <div class="note">
+                    Как поставить произношение без преподавателя:<br>
+                    Включаете ролик на YouTube (на скорости 0.75x или 1.0x). Слушаете фразу носителя, ставите паузу и <b>повторяете вслух секунда в секунду</b>, копируя движение губ, паузы и музыкальное ударение. Мышцы лица должны уставать — это признак правильной работы.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">⏱️ 3. Закон интервального повторения</div>
+                <div class="note">
+                    Мозг стирает 70% новой информации через 24 часа, если она не была востребована. Бесполезно учить язык 5 часов в субботу.<br>
+                    <b>Идеальный ритм:</b> 25–40 минут каждый день утром (карточки и письмо) + 20 минут вечером (YouTube/подкаст).
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 5: SYSTEM ROADMAP (ПОЛНОСТЬЮ ПЕРЕРАБОТАНО БЕЗ ТЕХНИЧЕСКИХ НАЗВАНИЙ) -->
+        <div id="tabSystem" class="section-view">
+            <div style="font-size: 0.88rem; color: #fde68a; background: var(--gold-bg); padding: 14px; border-radius: 14px; border: 1px solid var(--gold); line-height: 1.4;">
+                🗺️ <b>Полная траектория языкового прорыва:</b> Комплексная система ступенчатого освоения английского языка от алфавита до свободного владения:
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">0</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Вводный модуль: Фонетика и букварь</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">Алфавит, правила чтения сложных звуков TH, W, V, немые буквы, числа и дни недели.</div>
+                </div>
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">1</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Грамматический каркас A1–A2</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">Строгий порядок слов SVO, глагол To Be, времена Simple, Continuous, Perfect и условия.</div>
+                </div>
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">2</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Базовый лексикон и беглость B1</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">Матрица местоимений, предлоги времени и места, топ фразовых глаголов, герундий и матрица DO vs MAKE.</div>
+                </div>
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">3</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Мастерство и риторика B2–C2</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">Инверсия ораторов, смешанные условия, сослагательное наклонение, академическая номинализация и TED Talk архитектура.</div>
+                </div>
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">4</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Оксфордский словарь 10k</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">Гигантская база слов от A1 до C2, 3 формы глаголов, идиомы с живым поиском и режимом скрытия перевода.</div>
+                </div>
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">5</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Тренажер активного письма</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">228 практических заданий для письма в тетрадь и печати на клавиатуре со мгновенной автопроверкой.</div>
+                </div>
+            </div>
+
+            <div class="system-step">
+                <div class="step-num">6</div>
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #60a5fa;">Интерактивный тренажер диалогов</div>
+                    <div style="font-size: 0.82rem; color: #cbd5e1; line-height: 1.35;">30 детальных жизненных переписок в реальном времени с поддержкой подсказок и разбором вариантов.</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // 26 LETTERS WITH PHONETICS, AUDIO AND EXAMPLES
+        const ALPHABET = [
+            { ch: 'Aa', sound: '[eɪ]', ru: 'эй', ex: 'Apple', emoji: '🍏' },
+            { ch: 'Bb', sound: '[biː]', ru: 'би', ex: 'Book', emoji: '📖' },
+            { ch: 'Cc', sound: '[siː]', ru: 'си', ex: 'Cat', emoji: '🐱' },
+            { ch: 'Dd', sound: '[diː]', ru: 'ди', ex: 'Door', emoji: '🚪' },
+            { ch: 'Ee', sound: '[iː]', ru: 'и', ex: 'Egg', emoji: '🥚' },
+            { ch: 'Ff', sound: '[ef]', ru: 'эф', ex: 'Fish', emoji: '🐟' },
+            { ch: 'Gg', sound: '[dʒiː]', ru: 'джи', ex: 'Guitar', emoji: '🎸' },
+            { ch: 'Hh', sound: '[eɪtʃ]', ru: 'эйч', ex: 'House', emoji: '🏠' },
+            { ch: 'Ii', sound: '[aɪ]', ru: 'ай', ex: 'Ice', emoji: '🧊' },
+            { ch: 'Jj', sound: '[dʒeɪ]', ru: 'джей', ex: 'Juice', emoji: '🧃' },
+            { ch: 'Kk', sound: '[keɪ]', ru: 'кей', ex: 'Key', emoji: '🔑' },
+            { ch: 'Ll', sound: '[el]', ru: 'эл', ex: 'Lion', emoji: '🦁' },
+            { ch: 'Mm', sound: '[em]', ru: 'эм', ex: 'Money', emoji: '💵' },
+            { ch: 'Nn', sound: '[en]', ru: 'эн', ex: 'Night', emoji: '🌙' },
+            { ch: 'Oo', sound: '[oʊ]', ru: 'оу', ex: 'Orange', emoji: '🍊' },
+            { ch: 'Pp', sound: '[piː]', ru: 'пи', ex: 'Phone', emoji: '📱' },
+            { ch: 'Qq', sound: '[kjuː]', ru: 'кью', ex: 'Queen', emoji: '👑' },
+            { ch: 'Rr', sound: '[ɑːr]', ru: 'ар', ex: 'Red', emoji: '🔴' },
+            { ch: 'Ss', sound: '[es]', ru: 'эс', ex: 'Sun', emoji: '☀️' },
+            { ch: 'Tt', sound: '[tiː]', ru: 'ти', ex: 'Time', emoji: '⏰' },
+            { ch: 'Uu', sound: '[juː]', ru: 'ю', ex: 'Umbrella', emoji: '☂️' },
+            { ch: 'Vv', sound: '[viː]', ru: 'ви', ex: 'Voice', emoji: '🎙️' },
+            { ch: 'Ww', sound: '[ˈdʌbəl.juː]', ru: 'дабл-ю', ex: 'Water', emoji: '💧' },
+            { ch: 'Xx', sound: '[eks]', ru: 'экс', ex: 'Box', emoji: '📦' },
+            { ch: 'Yy', sound: '[waɪ]', ru: 'уай', ex: 'Yellow', emoji: '🟡' },
+            { ch: 'Zz', sound: '[zed / ziː]', ru: 'зед / зи', ex: 'Zebra', emoji: '🦓' }
+        ];
+
+        const synth = window.speechSynthesis;
+
+        function speak(text) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US';
+            u.rate = 0.85;
+            synth.speak(u);
+        }
+
+        function speakLetter(char, exampleWord) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            const letterOnly = char[0];
+            const u = new SpeechSynthesisUtterance(letterOnly);
+            u.lang = 'en-US';
+            u.rate = 0.8;
+            synth.speak(u);
+        }
+
+        function renderAlphabet() {
+            const grid = document.getElementById('abcGrid');
+            grid.innerHTML = '';
+
+            ALPHABET.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'letter-card';
+                card.onclick = () => speakLetter(item.ch, item.ex);
+                card.innerHTML = `
+                    <div class="char-main">${item.ch}</div>
+                    <div class="char-phonetic">${item.sound}</div>
+                    <div class="char-ru">[${item.ru}]</div>
+                    <div class="char-example" onclick="event.stopPropagation(); speak('${item.ex}')">
+                        ${item.emoji} ${item.ex}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // TAB SWITCHER CONTROLLER WITH FREEMIUM PAYWALL
+        const TAB_ORDER = ['tabAbc', 'tabPhonics', 'tabKit', 'tabHacks', 'tabSystem'];
+
+        function switchTab(tabId, el) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+
+            const tabIndex = TAB_ORDER.indexOf(tabId);
+            
+            // Freemium Check: Первые 2 вкладки (индексы 0 и 1) бесплатны. Начиная с индекса 2 — пэйволл!
+            if (tabIndex >= 2 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(tabIndex, 2)) {
+                    return; // Блокируем переключение
+                }
+            }
+
+            // Смена активного бейджа
+            TAB_ORDER.forEach(id => {
+                const btn = document.getElementById(`tabBtn_${id}`);
+                if (btn) {
+                    btn.style.background = '#172338';
+                    btn.style.color = 'var(--text-muted)';
+                }
+            });
+            el.style.background = 'rgba(59, 130, 246, 0.15)';
+            el.style.color = 'var(--primary)';
+
+            // Смена активного контента
+            document.querySelectorAll('.section-view').forEach(sec => sec.classList.remove('active'));
+            const targetSec = document.getElementById(tabId);
+            if (targetSec) targetSec.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAlphabet();
+
+            if (typeof TMABridge !== 'undefined') {
+                TMABridge.setupBackButton('index.html');
+            }
+        });
+    </script>
+</body>
+</html>

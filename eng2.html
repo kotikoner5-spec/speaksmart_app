@@ -1,0 +1,533 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Разговорная беглость B1-B2</title>
+    
+    <!-- Подключение единой дизайн-системы и Telegram SDK -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tma-bridge.js"></script>
+</head>
+<body>
+
+    <div class="header">
+        <div class="counter" id="slideCounter">1 / 8</div>
+        <div class="swipe-hint">← листайте пальцем →</div>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button class="nav-arrow nav-prev" onclick="prevSlide()">← Назад</button>
+    <button class="nav-arrow nav-next" onclick="nextSlide()">Вперед →</button>
+
+    <div class="slider-container" id="slider">
+
+        <!-- SLIDE 0: PHRASAL VERBS 1 (DEMO: ДОСТУПНО) -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">1. ФРАЗОВЫЕ ГЛАГОЛЫ: ПОИСК И СУТЬ</div>
+                <div class="note">Носители используют их вместо длинных академических слов!</div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">FIND OUT (Выяснить / Узнать новость)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I need to find out the truth')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">need</span> <span class="word">to</span> <span class="word">find</span> <span class="word">out</span> <span class="word">the</span> <span class="word">truth</span>.</div>
+                            <div class="ru-phrase">Мне нужно выяснить правду.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">FIGURE OUT (Разобраться / Понять логику)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I can not figure out how this works')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">can</span> <span class="word">not</span> <span class="word">figure</span> <span class="word">out</span> <span class="word">how</span> <span class="word">this</span> <span class="word">works</span>.</div>
+                            <div class="ru-phrase">Я не могу понять, как это работает.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-que">
+                    <span class="skeleton">LOOK FOR (Искать глазами или процессом)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('What are you looking for right now')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">What</span> <span class="word">are</span> <span class="word">you</span> <span class="word">looking</span> <span class="word">for</span> <span class="word">right</span> <span class="word">now</span>?</div>
+                            <div class="ru-phrase">Что ты сейчас ищешь?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">TURN OUT (Оказаться в итоге)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('It turned out to be very simple')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">It</span> <span class="word">turned</span> <span class="word">out</span> <span class="word">to</span> <span class="word">be</span> <span class="word">very</span> <span class="word">simple</span>.</div>
+                            <div class="ru-phrase">В итоге это оказалось очень просто.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 1: PHRASAL VERBS 2 (DEMO: ДОСТУПНО) -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">2. ФРАЗОВЫЕ ГЛАГОЛЫ: ДЕЙСТВИЕ И СТОП</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">GO ON (Продолжать действие)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Please go on I am listening')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Please</span> <span class="word">go</span> <span class="word">on</span>, <span class="word">I</span> <span class="word">am</span> <span class="word">listening</span>.</div>
+                            <div class="ru-phrase">Пожалуйста, продолжай, я слушаю.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-neg">
+                    <span class="skeleton">GIVE UP (Сдаваться / Бросать привычку)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Never give up on your goals')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Never</span> <span class="word">give</span> <span class="word">up</span> <span class="word">on</span> <span class="word">your</span> <span class="word">goals</span>.</div>
+                            <div class="ru-phrase">Никогда не сдавайся на пути к целям.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">CALL OFF (Отменить запланированное)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('They decided to call off the meeting')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">They</span> <span class="word">decided</span> <span class="word">to</span> <span class="word">call</span> <span class="word">off</span> <span class="word">the</span> <span class="word">meeting</span>.</div>
+                            <div class="ru-phrase">Они решили отменить встречу.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cyan">
+                    <span class="skeleton">PUT OFF (Откладывать на потом)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Do not put off what you can do today')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Do</span> <span class="word">not</span> <span class="word">put</span> <span class="word">off</span> <span class="word">what</span> <span class="word">you</span> <span class="word">can</span> <span class="word">do</span> <span class="word">today</span>.</div>
+                            <div class="ru-phrase">Не откладывай то, что можешь сделать сегодня.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: FILLERS & FLOW (PAYWALL ЗАБЛОКИРУЕТ ПЕРЕХОД СЮДА) -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">3. СЛОВА-ЗАПОЛНИТЕЛИ (БЕГЛОСТЬ)</div>
+                <div class="note">Дают мозгу 3 секунды подумать без неловкого молчания!</div>
+
+                <div class="row row-que">
+                    <span class="skeleton">ACTUALLY (Вообще-то / На самом деле)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Actually I think this is a great idea')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Actually</span>, <span class="word">I</span> <span class="word">think</span> <span class="word">this</span> <span class="word">is</span> <span class="word">a</span> <span class="word">great</span> <span class="word">idea</span>.</div>
+                            <div class="ru-phrase">Вообще-то, я считаю, что это отличная идея.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">TO BE HONEST (Честно говоря...)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('To be honest I do not really like it')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">To</span> <span class="word">be</span> <span class="word">honest</span>, <span class="word">I</span> <span class="word">do</span> <span class="word">not</span> <span class="word">really</span> <span class="word">like</span> <span class="word">it</span>.</div>
+                            <div class="ru-phrase">Честно говоря, мне это не особо нравится.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">BY THE WAY (Кстати, между прочим...)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('By the way where did you buy this car')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">By</span> <span class="word">the</span> <span class="word">way</span>, <span class="word">where</span> <span class="word">did</span> <span class="word">you</span> <span class="word">buy</span> <span class="word">this</span> <span class="word">car</span>?</div>
+                            <div class="ru-phrase">Кстати, где ты купил эту машину?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">IT DEPENDS ON (Это зависит от...)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('It depends on the weather tomorrow')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">It</span> <span class="word">depends</span> <span class="word">on</span> <span class="word">the</span> <span class="word">weather</span> <span class="word">tomorrow</span>.</div>
+                            <div class="ru-phrase">Это зависит от завтрашней погоды.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: REACTIONS -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">4. ЕСТЕСТВЕННЫЕ РЕАКЦИИ</div>
+                <div class="note">Как реагируют на слова собеседника реальные люди.</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">THAT MAKES SENSE (В этом есть логика / логично)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Yes that makes complete sense now')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Yes</span>, <span class="word">that</span> <span class="word">makes</span> <span class="word">complete</span> <span class="word">sense</span> <span class="word">now</span>.</div>
+                            <div class="ru-phrase">Да, теперь в этом есть абсолютный смысл.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cyan">
+                    <span class="skeleton">FAIR ENOUGH (Справедливо / Убедительно)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Fair enough I agree with your plan')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Fair</span> <span class="word">enough</span>, <span class="word">I</span> <span class="word">agree</span> <span class="word">with</span> <span class="word">your</span> <span class="word">plan</span>.</div>
+                            <div class="ru-phrase">Справедливо, я согласен с твоим планом.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-neg">
+                    <span class="skeleton">NO WAY! (Да ладно! / Быть не может!)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('No way I do not believe this story')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">No</span> <span class="word">way</span>! <span class="word">I</span> <span class="word">do</span> <span class="word">not</span> <span class="word">believe</span> <span class="word">this</span> <span class="word">story</span>.</div>
+                            <div class="ru-phrase">Не может быть! Я не верю этой истории.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">I DOUBT IT (Сомневаюсь в этом)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Will he come today I doubt it')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Will</span> <span class="word">he</span> <span class="word">come</span> <span class="word">today</span>? <span class="word">I</span> <span class="word">doubt</span> <span class="word">it</span>.</div>
+                            <div class="ru-phrase">Он придет сегодня? Я сомневаюсь.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: VERB + TO -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">5. СВЯЗКА: ГЛАГОЛ + TO (ИНФИНИТИВ)</div>
+                <div class="note">После этих глаголов ВСЕГДА ставится частица TO!</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">DECIDE TO (Решить что-то сделать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I decided to change my job')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">decided</span> <span class="word">to</span> <span class="word">change</span> <span class="word">my</span> <span class="word">job</span>.</div>
+                            <div class="ru-phrase">Я решил сменить работу.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">REFUSE TO (Отказаться что-то делать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He refused to sign the contract')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">refused</span> <span class="word">to</span> <span class="word">sign</span> <span class="word">the</span> <span class="word">contract</span>.</div>
+                            <div class="ru-phrase">Он отказался подписывать контракт.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">CAN AFFORD TO (Мочь позволить себе по деньгам)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('We can not afford to lose this client')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">We</span> <span class="word">can</span> <span class="word">not</span> <span class="word">afford</span> <span class="word">to</span> <span class="word">lose</span> <span class="word">this</span> <span class="word">client</span>.</div>
+                            <div class="ru-phrase">Мы не можем позволить себе потерять этого клиента.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cyan">
+                    <span class="skeleton">PROMISE TO (Обещать сделать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('She promised to call me later')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">She</span> <span class="word">promised</span> <span class="word">to</span> <span class="word">call</span> <span class="word">me</span> <span class="word">later</span>.</div>
+                            <div class="ru-phrase">Она пообещала позвонить мне позже.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: VERB + -ING -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">6. СВЯЗКА: ГЛАГОЛ + -ING (ГЕРУНДИЙ)</div>
+                <div class="note">После этих глаголов ВСЕГДА идет форма на -ING (никаких TO)!</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">ENJOY + -ING (Получать удовольствие от процесса)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I really enjoy learning languages')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">really</span> <span class="word">enjoy</span> <span class="word">learning</span> <span class="word">languages</span>.</div>
+                            <div class="ru-phrase">Мне действительно нравится учить языки.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-neg">
+                    <span class="skeleton">AVOID + -ING (Избегать делать что-то)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He avoids talking about his past')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">avoids</span> <span class="word">talking</span> <span class="word">about</span> <span class="word">his</span> <span class="word">past</span>.</div>
+                            <div class="ru-phrase">Он избегает разговоров о своем прошлом.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">KEEP + -ING (Продолжать раз за разом)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Why do you keep making excuses')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Why</span> <span class="word">do</span> <span class="word">you</span> <span class="word">keep</span> <span class="word">making</span> <span class="word">excuses</span>?</div>
+                            <div class="ru-phrase">Почему ты продолжаешь искать оправдания?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">SUGGEST + -ING (Предлагать действие)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I suggest taking a short break')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">suggest</span> <span class="word">taking</span> <span class="word">a</span> <span class="word">short</span> <span class="word">break</span>.</div>
+                            <div class="ru-phrase">Я предлагаю сделать небольшой перерыв.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: DO MATRIX -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">7. КОЛЛОКАЦИИ: ГЛАГОЛ "DO"</div>
+                <div class="note">DO = Процесс, рутина, обязанности или общая активность.</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">DO YOUR BEST (Сделать всё возможное)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Just do your best and do not worry')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Just</span> <span class="word">do</span> <span class="word">your</span> <span class="word">best</span> <span class="word">and</span> <span class="word">do</span> <span class="word">not</span> <span class="word">worry</span>.</div>
+                            <div class="ru-phrase">Просто сделай все, что в твоих силах, и не переживай.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">DO SOMEONE A FAVOR (Сделать одолжение)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Can you do me a quick favor')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Can</span> <span class="word">you</span> <span class="word">do</span> <span class="word">me</span> <span class="word">a</span> <span class="word">quick</span> <span class="word">favor</span>?</div>
+                            <div class="ru-phrase">Можешь сделать мне быстрое одолжение?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-que">
+                    <span class="skeleton">DO BUSINESS (Вести дела / бизнес)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('It is a pleasure to do business with you')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">It</span> <span class="word">is</span> <span class="word">a</span> <span class="word">pleasure</span> <span class="word">to</span> <span class="word">do</span> <span class="word">business</span> <span class="word">with</span> <span class="word">you</span>.</div>
+                            <div class="ru-phrase">Приятно вести с вами бизнес.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-cyan">
+                    <span class="skeleton">DO DAMAGE (Нанести ущерб / вред)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('The storm did a lot of damage')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">The</span> <span class="word">storm</span> <span class="word">did</span> <span class="word">a</span> <span class="word">lot</span> <span class="word">of</span> <span class="word">damage</span>.</div>
+                            <div class="ru-phrase">Шторм нанес огромный ущерб.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: MAKE MATRIX -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">8. КОЛЛОКАЦИИ: ГЛАГОЛ "MAKE"</div>
+                <div class="note">MAKE = Создание нового объекта, мысли или результата с нуля!</div>
+
+                <div class="row row-neg">
+                    <span class="skeleton">MAKE A MISTAKE (Допустить ошибку)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Everyone can make a simple mistake')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Everyone</span> <span class="word">can</span> <span class="word">make</span> <span class="word">a</span> <span class="word">simple</span> <span class="word">mistake</span>.</div>
+                            <div class="ru-phrase">Каждый может совершить простую ошибку.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">MAKE A DECISION (Принять решение)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('We have to make a decision now')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">We</span> <span class="word">have</span> <span class="word">to</span> <span class="word">make</span> <span class="word">a</span> <span class="word">decision</span> <span class="word">now</span>.</div>
+                            <div class="ru-phrase">Мы должны принять решение сейчас.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">MAKE MONEY (Зарабатывать деньги)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He made a lot of money in tech')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">made</span> <span class="word">a</span> <span class="word">lot</span> <span class="word">of</span> <span class="word">money</span> <span class="word">in</span> <span class="word">tech</span>.</div>
+                            <div class="ru-phrase">Он заработал много денег в IT.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">MAKE AN EFFORT (Приложить усилие)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('You need to make an effort to succeed')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">You</span> <span class="word">need</span> <span class="word">to</span> <span class="word">make</span> <span class="word">an</span> <span class="word">effort</span> <span class="word">to</span> <span class="word">succeed</span>.</div>
+                            <div class="ru-phrase">Тебе нужно приложить усилие, чтобы преуспеть.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // TEXT TO SPEECH ENGINE
+        const synth = window.speechSynthesis;
+
+        function speakWord(word, element) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+
+            document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
+            if (element) element.classList.add('speaking');
+
+            const cleanWord = word.replace(/[^a-zA-Z']/g, '');
+            const utter = new SpeechSynthesisUtterance(cleanWord);
+            utter.lang = 'en-US';
+            utter.rate = 0.85;
+
+            utter.onend = () => {
+                if (element) element.classList.remove('speaking');
+            };
+
+            synth.speak(utter);
+        }
+
+        function playWholePhrase(phrase) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            const utter = new SpeechSynthesisUtterance(phrase);
+            utter.lang = 'en-US';
+            utter.rate = 0.9;
+            synth.speak(utter);
+        }
+
+        // Attach Click Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.word').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    speakWord(item.innerText, item);
+                });
+            });
+
+            // Setup Telegram Back Button
+            if (typeof TMABridge !== 'undefined') {
+                TMABridge.setupBackButton('index.html');
+            }
+        });
+
+        // SLIDER CONTROLLER WITH PAYWALL LOGIC
+        const slider = document.getElementById('slider');
+        const counter = document.getElementById('slideCounter');
+        const totalSlides = 8;
+        let currentPage = 0;
+
+        slider.addEventListener('scroll', () => {
+            const page = Math.round(slider.scrollLeft / window.innerWidth);
+            
+            // Freemium Check: Если свайпнули на 3-й слайд (индекс 2) и нет премиума
+            if (page >= 2 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(page, 2)) {
+                    // Возвращаем пользователя на последний доступный слайд (индекс 1)
+                    slider.scrollLeft = 1 * window.innerWidth;
+                    return;
+                }
+            }
+
+            currentPage = page;
+            counter.innerText = `${currentPage + 1} / ${totalSlides}`;
+        });
+
+        function nextSlide() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            
+            // Freemium Check при нажатии кнопки "Вперед"
+            if (typeof TMABridge !== 'undefined' && !TMABridge.checkDemoLimit(currentPage + 1, 2)) {
+                return; // Блокируем переход, пэйволл уже показан
+            }
+
+            if (currentPage < totalSlides - 1) {
+                slider.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
+            }
+        }
+
+        function prevSlide() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            if (currentPage > 0) {
+                slider.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

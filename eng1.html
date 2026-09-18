@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Лексикон и Предлоги A1-A2</title>
+    
+    <!-- Подключение единой дизайн-системы и Telegram SDK -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tma-bridge.js"></script>
+
+    <style>
+        /* Уникальные стили только для таблицы местоимений в этом файле */
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.85rem;
+        }
+        .matrix-table th {
+            text-align: left;
+            color: var(--text-muted);
+            padding: 6px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+        }
+        .matrix-table td {
+            padding: 6px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="counter" id="slideCounter">1 / 8</div>
+        <div class="swipe-hint">← листайте пальцем →</div>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button class="nav-arrow nav-prev" onclick="prevSlide()">← Назад</button>
+    <button class="nav-arrow nav-next" onclick="nextSlide()">Вперед →</button>
+
+    <div class="slider-container" id="slider">
+
+        <!-- SLIDE 0: PRONOUN MATRIX (DEMO: ДОСТУПНО) -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">1. МАТРИЦА МЕСТОИМЕНИЙ</div>
+                <div class="note">Никогда не путайте КТО действует и НА КОГО направлено действие!</div>
+
+                <table class="matrix-table">
+                    <tr>
+                        <th>КТО?</th>
+                        <th>КОГО / КОМУ?</th>
+                        <th>ЧЕЙ?</th>
+                    </tr>
+                    <tr>
+                        <td><span class="word">I</span> (Я)</td>
+                        <td><span class="word">me</span> (меня/мне)</td>
+                        <td><span class="word">my</span> (мой)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="word">You</span> (Ты)</td>
+                        <td><span class="word">you</span> (тебя/тебе)</td>
+                        <td><span class="word">your</span> (твой)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="word">He</span> (Он)</td>
+                        <td><span class="word">him</span> (его/ему)</td>
+                        <td><span class="word">his</span> (его)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="word">She</span> (Она)</td>
+                        <td><span class="word">her</span> (её/ей)</td>
+                        <td><span class="word">her</span> (её)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="word">We</span> (Мы)</td>
+                        <td><span class="word">us</span> (нас/нам)</td>
+                        <td><span class="word">our</span> (наш)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="word">They</span> (Они)</td>
+                        <td><span class="word">them</span> (их/им)</td>
+                        <td><span class="word">their</span> (их)</td>
+                    </tr>
+                </table>
+
+                <div class="section-title">Примеры в речи</div>
+                <div class="row row-pos">
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He loves her but she hates him')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">loves</span> <span class="word">her</span>, <span class="word">but</span> <span class="word">she</span> <span class="word">hates</span> <span class="word">him</span>.</div>
+                            <div class="ru-phrase">Он любит её, но она ненавидит его.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row row-pos">
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Can you give me your key')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Can</span> <span class="word">you</span> <span class="word">give</span> <span class="word">me</span> <span class="word">your</span> <span class="word">key</span>?</div>
+                            <div class="ru-phrase">Можешь дать мне свой ключ?</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 1: TIME PREPOSITIONS (DEMO: ДОСТУПНО) -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">2. ПРЕДЛОГИ ВРЕМЕНИ (AT / ON / IN)</div>
+                <div class="note">От узкой точки времени — к широким периодам.</div>
+
+                <div class="row row-que">
+                    <span class="skeleton">🎯 AT — Точное время и момент</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('at five o clock at night at noon')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">at</span> <span class="word">five</span> <span class="word">o'clock</span>, <span class="word">at</span> <span class="word">night</span>, <span class="word">at</span> <span class="word">noon</span>.</div>
+                            <div class="ru-phrase">В 5 часов, ночью, в полдень.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">📅 ON — Дни недели и точные даты</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('on Monday on Friday night on my birthday')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">on</span> <span class="word">Monday</span>, <span class="word">on</span> <span class="word">Friday</span> <span class="word">night</span>, <span class="word">on</span> <span class="word">my</span> <span class="word">birthday</span>.</div>
+                            <div class="ru-phrase">В понедельник, в пятницу вечером, в день рождения.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">🌍 IN — Месяцы, годы, сезоны, части суток</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('in the morning in May in summer in twenty twenty five')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">in</span> <span class="word">the</span> <span class="word">morning</span>, <span class="word">in</span> <span class="word">May</span>, <span class="word">in</span> <span class="word">summer</span>, <span class="word">in</span> <span class="word">2025</span>.</div>
+                            <div class="ru-phrase">Утром, в мае, летом, в 2025 году.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-pos">
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I will meet you on Friday at six pm')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">will</span> <span class="word">meet</span> <span class="word">you</span> <span class="word">on</span> <span class="word">Friday</span> <span class="word">at</span> <span class="word">6</span> <span class="word">pm</span>.</div>
+                            <div class="ru-phrase">Я встречу тебя в пятницу в 6 вечера.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: PLACE PREPOSITIONS (PAYWALL ЗАБЛОКИРУЕТ ПЕРЕХОД СЮДА) -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">3. МЕСТО И НАПРАВЛЕНИЕ</div>
+
+                <div class="row row-que">
+                    <span class="skeleton">📍 AT — Конкретная точка, заведение</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('at home at work at the station')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">at</span> <span class="word">home</span>, <span class="word">at</span> <span class="word">work</span>, <span class="word">at</span> <span class="word">the</span> <span class="word">station</span>.</div>
+                            <div class="ru-phrase">Дома, на работе, на вокзале.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">📦 IN — Внутри пространства, город, страна</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('in the room in London in a car')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">in</span> <span class="word">the</span> <span class="word">room</span>, <span class="word">in</span> <span class="word">London</span>, <span class="word">in</span> <span class="word">a</span> <span class="word">car</span>.</div>
+                            <div class="ru-phrase">В комнате, в Лондоне, в машине.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">🛬 ON — Поверхность и общественный транспорт</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('on the table on the bus on a plane')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">on</span> <span class="word">the</span> <span class="word">table</span>, <span class="word">on</span> <span class="word">the</span> <span class="word">bus</span>, <span class="word">on</span> <span class="word">a</span> <span class="word">plane</span>.</div>
+                            <div class="ru-phrase">На столе, в автобусе, в самолете.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">➡️ TO — Направление движения (Куда?)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He went to work and then came to me')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">went</span> <span class="word">to</span> <span class="word">work</span> <span class="word">and</span> <span class="word">then</span> <span class="word">came</span> <span class="word">to</span> <span class="word">me</span>.</div>
+                            <div class="ru-phrase">Он пошел на работу, а затем пришел ко мне.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: CORE VERBS 1 -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">4. ГЛАГОЛЫ: БЫТ И ДЕЙСТВИЕ</div>
+                <div class="note">Учим сразу 2-ю форму (прошлое время).</div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">GET → GOT (Получать / Добираться / Становиться)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I got your message and got tired')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">got</span> <span class="word">your</span> <span class="word">message</span> <span class="word">and</span> <span class="word">got</span> <span class="word">tired</span>.</div>
+                            <div class="ru-phrase">Я получил твое сообщение и устал.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">TAKE → TOOK (Брать) / GIVE → GAVE (Давать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He took the money and gave me the key')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">took</span> <span class="word">the</span> <span class="word">money</span> <span class="word">and</span> <span class="word">gave</span> <span class="word">me</span> <span class="word">the</span> <span class="word">key</span>.</div>
+                            <div class="ru-phrase">Он взял деньги и дал мне ключ.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-que">
+                    <span class="skeleton">MAKE → MADE (Создавать) / DO → DID (Делать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I did my job and made a mistake')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">did</span> <span class="word">my</span> <span class="word">job</span> <span class="word">and</span> <span class="word">made</span> <span class="word">a</span> <span class="word">mistake</span>.</div>
+                            <div class="ru-phrase">Я сделал работу и допустил ошибку.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: CORE VERBS 2 -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">5. ГЛАГОЛЫ: ДВИЖЕНИЕ И РЕЧЬ</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">GO → WENT (Идти) / COME → CAME (Приходить)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('She went home and came back')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">She</span> <span class="word">went</span> <span class="word">home</span> <span class="word">and</span> <span class="word">came</span> <span class="word">back</span>.</div>
+                            <div class="ru-phrase">Она пошла домой и вернулась.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">LEAVE → LEFT (Покидать, уходить, оставлять)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He left the office at six')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">left</span> <span class="word">the</span> <span class="word">office</span> <span class="word">at</span> <span class="word">six</span>.</div>
+                            <div class="ru-phrase">Он ушел из офиса в шесть.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">SAY → SAID (Сказать что-то) / TELL → TOLD (Кому-то)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('He said that he told you everything')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">He</span> <span class="word">said</span> <span class="word">that</span> <span class="word">he</span> <span class="word">told</span> <span class="word">you</span> <span class="word">everything</span>.</div>
+                            <div class="ru-phrase">Он сказал, что рассказал тебе всё.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: CORE VERBS 3 -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">6. ГЛАГОЛЫ: МЫШЛЕНИЕ И ЧУВСТВА</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">THINK → THOUGHT (Думать) / KNOW → KNEW (Знать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I thought you knew about this')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">thought</span> <span class="word">you</span> <span class="word">knew</span> <span class="word">about</span> <span class="word">this</span>.</div>
+                            <div class="ru-phrase">Я думал, ты знал об этом.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-que">
+                    <span class="skeleton">UNDERSTAND → UNDERSTOOD (Понимать)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I understood the question')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">understood</span> <span class="word">the</span> <span class="word">question</span>.</div>
+                            <div class="ru-phrase">Я понял вопрос.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">WANT TO / NEED TO (Хотеть / Быть должным)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I want to leave but I need to work')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">want</span> <span class="word">to</span> <span class="word">leave</span>, <span class="word">but</span> <span class="word">I</span> <span class="word">need</span> <span class="word">to</span> <span class="word">work</span>.</div>
+                            <div class="ru-phrase">Я хочу уйти, но мне нужно работать.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: LINKING WORDS 1 -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">7. СВЯЗКИ: ПРИЧИНА И СЛЕДСТВИЕ</div>
+                <div class="note">Склеиваем два простых предложения в одно связное.</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">BECAUSE (Потому что)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I bought it because I needed it')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">bought</span> <span class="word">it</span> <span class="word">because</span> <span class="word">I</span> <span class="word">needed</span> <span class="word">it</span>.</div>
+                            <div class="ru-phrase">Я купил это, потому что мне это было нужно.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">SO (Поэтому / Так что)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I was tired so I went to bed')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">was</span> <span class="word">tired</span>, <span class="word">so</span> <span class="word">I</span> <span class="word">went</span> <span class="word">to</span> <span class="word">bed</span>.</div>
+                            <div class="ru-phrase">Я устал, поэтому пошел спать.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">THAT'S WHY (Вот почему)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I want to travel that is why I learn English')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">want</span> <span class="word">to</span> <span class="word">travel</span>, <span class="word">that</span> <span class="word">is</span> <span class="word">why</span> <span class="word">I</span> <span class="word">learn</span> <span class="word">English</span>.</div>
+                            <div class="ru-phrase">Я хочу путешествовать, вот почему я учу английский.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: LINKING WORDS 2 -->
+        <div class="slide">
+            <div class="card">
+                <div class="card-header">8. СВЯЗКИ: КОНТРАСТ И ВРЕМЯ</div>
+
+                <div class="row row-pos">
+                    <span class="skeleton">BUT (Но) / ALTHOUGH (Хотя)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Although it was raining I went for a walk')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Although</span> <span class="word">it</span> <span class="word">was</span> <span class="word">raining</span>, <span class="word">I</span> <span class="word">went</span> <span class="word">for</span> <span class="word">a</span> <span class="word">walk</span>.</div>
+                            <div class="ru-phrase">Хотя шел дождь, я пошел на прогулку.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-gold">
+                    <span class="skeleton">WHEN (Когда) / WHILE (В то время как)</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('Call me when you arrive at the airport')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">Call</span> <span class="word">me</span> <span class="word">when</span> <span class="word">you</span> <span class="word">arrive</span> <span class="word">at</span> <span class="word">the</span> <span class="word">airport</span>.</div>
+                            <div class="ru-phrase">Позвони мне, когда приедешь в аэропорт.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-purple">
+                    <span class="skeleton">HOWEVER (Однако) — пауза в речи</span>
+                    <div class="example-box">
+                        <button class="audio-btn" onclick="playWholePhrase('I tried my best However we lost the game')">🔊</button>
+                        <div class="text-content">
+                            <div class="en-phrase"><span class="word">I</span> <span class="word">tried</span> <span class="word">my</span> <span class="word">best</span>. <span class="word">However</span>, <span class="word">we</span> <span class="word">lost</span> <span class="word">the</span> <span class="word">game</span>.</div>
+                            <div class="ru-phrase">Я старался изо всех сил. Однако мы проиграли игру.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // TEXT TO SPEECH ENGINE
+        const synth = window.speechSynthesis;
+
+        function speakWord(word, element) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+
+            document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
+            if (element) element.classList.add('speaking');
+
+            const cleanWord = word.replace(/[^a-zA-Z']/g, '');
+            const utter = new SpeechSynthesisUtterance(cleanWord);
+            utter.lang = 'en-US';
+            utter.rate = 0.85;
+
+            utter.onend = () => {
+                if (element) element.classList.remove('speaking');
+            };
+
+            synth.speak(utter);
+        }
+
+        function playWholePhrase(phrase) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            const utter = new SpeechSynthesisUtterance(phrase);
+            utter.lang = 'en-US';
+            utter.rate = 0.9;
+            synth.speak(utter);
+        }
+
+        // Attach Click Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.word').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    speakWord(item.innerText, item);
+                });
+            });
+
+            // Setup Telegram Back Button
+            if (typeof TMABridge !== 'undefined') {
+                TMABridge.setupBackButton('index.html');
+            }
+        });
+
+        // SLIDER CONTROLLER WITH PAYWALL LOGIC
+        const slider = document.getElementById('slider');
+        const counter = document.getElementById('slideCounter');
+        const totalSlides = 8;
+        let currentPage = 0;
+
+        slider.addEventListener('scroll', () => {
+            const page = Math.round(slider.scrollLeft / window.innerWidth);
+            
+            // Freemium Check: Если свайпнули на 3-й слайд (индекс 2) и нет премиума
+            if (page >= 2 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(page, 2)) {
+                    // Возвращаем пользователя на последний доступный слайд (индекс 1)
+                    slider.scrollLeft = 1 * window.innerWidth;
+                    return;
+                }
+            }
+
+            currentPage = page;
+            counter.innerText = `${currentPage + 1} / ${totalSlides}`;
+        });
+
+        function nextSlide() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            
+            // Freemium Check при нажатии кнопки "Вперед"
+            if (typeof TMABridge !== 'undefined' && !TMABridge.checkDemoLimit(currentPage + 1, 2)) {
+                return; // Блокируем переход, пэйволл уже показан
+            }
+
+            if (currentPage < totalSlides - 1) {
+                slider.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
+            }
+        }
+
+        function prevSlide() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            if (currentPage > 0) {
+                slider.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>

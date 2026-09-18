@@ -1,0 +1,919 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Тренажер активного письма и печати</title>
+    
+    <!-- Подключение единой дизайн-системы и Telegram SDK -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tma-bridge.js"></script>
+
+    <style>
+        /* Специфические стили тренажера письма */
+        body {
+            min-height: 100vh;
+            height: auto;
+            overflow-y: auto;
+            padding-bottom: calc(60px + var(--sa-b));
+        }
+
+        .top-panel {
+            position: sticky;
+            top: 0;
+            background: rgba(11, 15, 25, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: calc(12px + var(--sa-t)) calc(16px + var(--sa-r)) 10px calc(16px + var(--sa-l));
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-toggle-btn {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .filter-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+        .filter-scroll::-webkit-scrollbar { display: none; }
+
+        .filter-chip {
+            padding: 5px 12px;
+            background: #172338;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .filter-chip.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .drill-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .russian-prompt {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            line-height: 1.4;
+            padding: 12px;
+            background: rgba(0,0,0,0.25);
+            border-left: 4px solid var(--gold);
+            border-radius: 8px;
+        }
+
+        .hint-block {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            background: rgba(148, 163, 184, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: ui-monospace, Consolas, monospace;
+            display: none;
+        }
+
+        .user-input {
+            width: 100%;
+            background: #0b1120;
+            border: 2px solid var(--card-border);
+            color: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .user-input:focus { border-color: var(--primary); }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .btn:active { opacity: 0.85; }
+
+        .btn-check { background: var(--primary); color: #fff; }
+        .btn-hint { background: #1e293b; color: var(--text-muted); border: 1px solid var(--card-border); flex: 0 0 46px; }
+        .btn-next { background: var(--pos); color: #0f172a; display: none; }
+
+        .feedback-box {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 10px;
+        }
+        .feedback-success { background: var(--pos-bg); border: 1px solid var(--pos); }
+        .feedback-diff { background: var(--gold-bg); border: 1px solid var(--gold); }
+
+        .notebook-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .notebook-ru {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .notebook-en {
+            font-size: 0.9rem;
+            color: #60a5fa;
+            font-weight: 600;
+            display: none;
+            background: rgba(0,0,0,0.25);
+            padding: 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-panel">
+        <div class="header-row">
+            <div class="app-title">✍️ Тренажер Письма и Печати</div>
+            <button class="view-toggle-btn" id="viewToggleBtn" onclick="toggleViewMode()">📖 Режим тетради</button>
+        </div>
+
+        <div class="filter-scroll">
+            <div class="filter-chip active" onclick="setCategory('all', this)">Все задания (228)</div>
+            <div class="filter-chip" onclick="setCategory('a1_a2', this)">🌱 A1-A2: Скелеты</div>
+            <div class="filter-chip" onclick="setCategory('b1', this)">⚡ B1: Фразовые и связки</div>
+            <div class="filter-chip" onclick="setCategory('b2', this)">🔥 B2: Пассив и модальные</div>
+            <div class="filter-chip" onclick="setCategory('c1_c2', this)">💎 C1-C2: Инверсия и риторика</div>
+        </div>
+    </div>
+
+    <div class="container" style="max-width: 760px; margin: 0 auto; padding: 16px;">
+
+        <!-- DRILL MODE (SINGLE INTERACTIVE CARD) -->
+        <div id="drillView">
+            <div class="drill-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="levelBadge" style="font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">B2 Practice</span>
+                    <span id="drillCounter" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700;">1 / 50</span>
+                </div>
+
+                <div class="russian-prompt" id="promptRu">
+                    Загрузка задания...
+                </div>
+
+                <div class="hint-block" id="hintBox">
+                    Подсказка по скелету: <span id="hintText">...</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="text" id="userTextInput" class="user-input" placeholder="Напечатайте перевод на английском..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-hint" title="Показать подсказку по скелету" onclick="toggleHint()">💡</button>
+                        <button class="btn btn-check" id="btnCheck" onclick="checkAnswer()">Проверить (Enter)</button>
+                        <button class="btn btn-next" id="btnNext" onclick="nextCard()">Следующее →</button>
+                    </div>
+                </div>
+
+                <div class="feedback-box" id="feedbackBox">
+                    <div id="feedbackTitle" style="font-size: 0.85rem; font-weight: 800;"></div>
+                    <div id="targetSentenceContainer" style="font-size: 1.05rem; font-weight: 700; line-height: 1.4; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"></div>
+                    <div id="grammarExplanation" style="font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px;"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-muted); text-align: center;">
+                💡 <b>Совет:</b> Сначала произнесите фразу вслух, затем напечатайте. Каждое слово в ответе кликабельно для озвучки.
+            </div>
+        </div>
+
+        <!-- NOTEBOOK CHECKLIST MODE -->
+        <div id="notebookView" style="display: none; flex-direction: column; gap: 12px;">
+            <div style="background: var(--gold-bg); border: 1px solid var(--gold); padding: 12px; border-radius: 12px; margin-bottom: 12px; font-size: 0.85rem; color: #fde68a;">
+                📝 <b>Режим письма в тетради:</b> Положите телефон рядом, возьмите ручку и напишите перевод этих предложений в тетрадь. После этого нажмите кнопку проверки под каждым заданием для сверки!
+            </div>
+            <div id="notebookListContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. БАЗОВЫЙ НАБОР ЗАДАНИЙ (28 ШТУК)
+        const DRILLS = [
+            {
+                cat: 'a1_a2', lvl: 'A1', badgeBg: 'var(--pos-bg)', badgeColor: 'var(--pos)',
+                ru: 'Я пью кофе на кухне каждое утро.',
+                en: 'I drink coffee in the kitchen every morning.',
+                skeleton: '[КТО] + [ДЕЙСТВИЕ] + [ЧТО] + [ГДЕ] + [КОГДА]',
+                exp: 'Золотое правило фиксированного порядка слов: Кто + Действие + Что + Где + Когда.'
+            },
+            {
+                cat: 'a1_a2', lvl: 'A1', badgeBg: 'var(--pos-bg)', badgeColor: 'var(--pos)',
+                ru: 'Ты был занят вчера вечером?',
+                en: 'Were you busy yesterday evening?',
+                skeleton: 'Were + [КТО] + [КАКОЙ] + [КОГДА]?',
+                exp: 'Вопрос с глаголом TO BE в прошлом для местоимения You.'
+            },
+            {
+                cat: 'a1_a2', lvl: 'A2', badgeBg: 'var(--pos-bg)', badgeColor: 'var(--pos)',
+                ru: 'Он не собирается покупать эту старую машину.',
+                en: 'He is not going to buy this old car.',
+                skeleton: '[КТО] + is not going to + [ГЛАГОЛ]',
+                exp: 'Конструкция to be going to для выражения заранее запланированного намерения.'
+            },
+            {
+                cat: 'a1_a2', lvl: 'A2', badgeBg: 'var(--pos-bg)', badgeColor: 'var(--pos)',
+                ru: 'Она работает здесь уже три года.',
+                en: 'She has worked here for three years.',
+                skeleton: '[КТО] + has + [V3/ed] + for [период]',
+                exp: 'Present Perfect для действия, начавшегося в прошлом и продолжающегося сейчас.'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Я встречу тебя в пятницу в 6 вечера.',
+                en: 'I will meet you on Friday at 6 pm.',
+                skeleton: 'will meet + ON [день] + AT [время]',
+                exp: 'Предлог ON для дней недели, предлог AT для точного часа.'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Они решили отменить сегодняшнюю встречу.',
+                en: 'They decided to call off today\'s meeting.',
+                skeleton: 'decided to + CALL OFF (фразовый глагол)',
+                exp: 'Фразовый глагол CALL OFF означает "отменить". После decide всегда идет инфинитив с TO.'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Я очень устал, поэтому пошел спать пораньше.',
+                en: 'I was very tired so I went to bed earlier.',
+                skeleton: '[Факт 1] + SO + [Следствие]',
+                exp: 'Связка SO выражает прямое логическое следствие ("поэтому / так что").'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Можешь сделать мне быстрое одолжение?',
+                en: 'Can you do me a quick favor?',
+                skeleton: 'DO someone a favor (коллокация с DO)',
+                exp: 'С одолжениями ВСЕГДА используется глагол DO, а не MAKE!'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Я наконец-то понял, как решить эту проблему.',
+                en: 'I finally figured out how to solve this problem.',
+                skeleton: 'finally + FIGURED OUT + how to...',
+                exp: 'Фразовый глагол FIGURE OUT = "разобраться, допереть своим умом".'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Честно говоря, это зависит от погоды завтра.',
+                en: 'To be honest it depends on the weather tomorrow.',
+                skeleton: 'TO BE HONEST + it depends on...',
+                exp: 'Разговорный филлер To be honest + управление глагола DEPEND ON (зависеть от).'
+            },
+            {
+                cat: 'b1', lvl: 'B1', badgeBg: 'var(--primary-bg)', badgeColor: 'var(--primary)',
+                ru: 'Мне действительно нравится изучать иностранные языки.',
+                en: 'I really enjoy learning foreign languages.',
+                skeleton: 'enjoy + [ГЛАГОЛ-ing]',
+                exp: 'После enjoy ВСЕГДА идет герундий (-ing), говорить "enjoy to learn" — грубая ошибка.'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Мне следовало предупредить тебя об этом заранее.',
+                en: 'I should have warned you about this in advance.',
+                skeleton: 'SHOULD HAVE + [V3]',
+                exp: 'Сожаление о прошлом: "надо было сделать, а я не сделал".'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Он не мог отправить эти деньги (это исключено).',
+                en: 'He could not have sent that money.',
+                skeleton: 'COULD NOT HAVE + [V3]',
+                exp: 'Прошедшая модальная дедукция: 100% уверенность в невозможности события.'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Несмотря на сильный дождь, мы пошли на долгую прогулку.',
+                en: 'Despite the heavy rain we went for a long walk.',
+                skeleton: 'DESPITE + [существительное без предлогов]',
+                exp: 'После Despite предлог OF НЕ ставится! Либо Despite the rain, либо In spite of the rain.'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Раньше я жил один, но сейчас я привык жить с семьей.',
+                en: 'I used to live alone but now I am used to living with family.',
+                skeleton: 'USED TO [V1] ... AM USED TO [V-ing]',
+                exp: 'Used to live = прошлая привычка; am used to living = текущая адаптированность.'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Жаль, что я не знал об этом правиле вчера.',
+                en: 'I wish I had known about this rule yesterday.',
+                skeleton: 'I WISH + [Had + V3]',
+                exp: 'I wish о прошлом всегда требует формы Past Perfect (Had + 3 форма).'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Чем больше ты практикуешься, тем проще это становится.',
+                en: 'The more you practice the easier it becomes.',
+                skeleton: 'THE [сравнение 1] , THE [сравнение 2]',
+                exp: 'Конструкция двойного сравнительного оборота "The more..., the easier...".'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'То, что мне действительно нужно — это пара дней отдыха.',
+                en: 'What I really need is a couple of days of rest.',
+                skeleton: 'WHAT I [действие] IS...',
+                exp: 'Cleft sentence (расщепленное предложение) для элегантного выделения главной сути.'
+            },
+            {
+                cat: 'b2', lvl: 'B2', badgeBg: 'var(--gold-bg)', badgeColor: 'var(--gold)',
+                ru: 'Он сказал мне, что позвонит мне на следующий день.',
+                en: 'He told me that he would call me the next day.',
+                skeleton: 'told me that + WOULD + call',
+                exp: 'Косвенная речь: согласование времен превращает will в would.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C1', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Мы не только выполнили план, но и удвоили выручку.',
+                en: 'Not only did we meet the target but we also doubled our revenue.',
+                skeleton: 'NOT ONLY DID + [КТО] + [V1] , BUT ALSO...',
+                exp: 'Инверсия с отрицательным оборотом: вспомогательный глагол DID идет перед подлежащим.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C1', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Ни при каких обстоятельствах мы не пойдем на компромисс.',
+                en: 'Under no circumstances will we compromise.',
+                skeleton: 'UNDER NO CIRCUMSTANCES WILL + [КТО]...',
+                exp: 'Жесткая ораторская инверсия: волевой маркер WILL ставится перед WE.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C1', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Если бы я инвестировал тогда, я был бы богат сейчас.',
+                en: 'If I had invested back then I would be rich now.',
+                skeleton: 'If + [Had + V3] , would + [V1 сейчас]',
+                exp: 'Mixed Conditional: причина в прошлом (Had invested) → результат сейчас (would be).'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C1', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Я поручил своей юридической команде перепроверить весь договор.',
+                en: 'I had my legal team review the entire contract.',
+                skeleton: 'HAVE + [кого] + [V1 начальная форма]',
+                exp: 'Каузативная конструкция делегирования задачи: have someone do something.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C2', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Крайне необходимо, чтобы каждый участник был проинформирован.',
+                en: 'It is imperative that every participant be informed.',
+                skeleton: 'It is imperative that + [кто] + BE (Subjunctive)',
+                exp: 'Сослагательное наклонение (Subjunctive): глагол to be не меняется на is/was, а остается BE.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C2', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Как бы трудно это ни было, мы достигли своей цели.',
+                en: 'Difficult though it was we achieved our goal.',
+                skeleton: '[Adjective] + THOUGH IT WAS , [главная мысль]',
+                exp: 'Стилистический фронтинг (Fronting) высшего литературного регистра C2.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C2', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Я и понятия не имел, что эта встреча изменит мою жизнь.',
+                en: 'Little did I know that this meeting would change my life.',
+                skeleton: 'LITTLE DID I KNOW that...',
+                exp: 'Хрестоматийная идиоматическая инверсия рассказчика.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C1', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Оглядываясь назад, разворот стратегии был правильным решением.',
+                en: 'In retrospect pivoting the strategy was the right decision.',
+                skeleton: 'IN RETROSPECT , [Герундий в роли подлежащего]...',
+                exp: 'Коннектор C1 In retrospect (в ретроспективе) + герундиальное подлежащее Pivoting.'
+            },
+            {
+                cat: 'c1_c2', lvl: 'C2', badgeBg: 'var(--purple-bg)', badgeColor: 'var(--purple)',
+                ru: 'Тем не менее, бездействие представляет куда большую опасность.',
+                en: 'That being said inaction is far more dangerous.',
+                skeleton: 'THAT BEING SAID , [подлежащее] is FAR more...',
+                exp: 'Связка That being said (тем не менее / с учетом сказанного) + усилитель FAR more.'
+            }
+        ];
+
+        // 2. ДОПОЛНИТЕЛЬНЫЙ БЛОК 1 (100 ШТУК)
+        const EXTRA_DRILLS_PART_1 = [
+            ['a1_a2', 'A1', 'Я живу в центре города со своим братом.', 'I live in the city center with my brother.', '[КТО] + live in... + with...', 'Порядок слов SVO: Подлежащее + сказуемое + дополнение.'],
+            ['a1_a2', 'A1', 'Она не пьет чай по вечерам.', 'She does not drink tea in the evenings.', '[КТО] + does not + [V1]', 'Отрицание Present Simple для He/She/It через does not.'],
+            ['a1_a2', 'A1', 'Где ты работаешь в настоящее время?', 'Where do you work at present?', 'Where + do + [КТО] + [V1]?', 'Специальный вопрос Q-A-S-V с вспомогательным do.'],
+            ['a1_a2', 'A1', 'Мы были очень счастливы увидеть тебя вчера.', 'We were very happy to see you yesterday.', '[КТО] + were + happy to see...', 'Глагол TO BE в Past Simple для местоимения We (were).'],
+            ['a1_a2', 'A1', 'Он вчера не пришел на работу.', 'He did not come to work yesterday.', '[КТО] + did not + [V1]', 'Отрицание в Past Simple: вспомогательный did not + начальная форма.'],
+            ['a1_a2', 'A1', 'Ты позвонишь мне завтра утром?', 'Will you call me tomorrow morning?', 'Will + [КТО] + [V1]?', 'Вопрос во Future Simple для спонтанного решения или просьбы.'],
+            ['a1_a2', 'A1', 'Я сейчас читаю очень интересную книгу.', 'I am reading a very interesting book right now.', '[КТО] + am + [V-ing]', 'Present Continuous: действие в момент речи.'],
+            ['a1_a2', 'A1', 'Они не спят, они смотрят фильм.', 'They are not sleeping they are watching a movie.', '[КТО] + are not + [V-ing]', 'Отрицание и утверждение процесса в Present Continuous.'],
+            ['a1_a2', 'A1', 'Ты когда-нибудь был в Париже?', 'Have you ever been to Paris?', 'Have + [КТО] + ever been to...?', 'Классический вопрос Present Perfect о жизненном опыте с предлогом TO.'],
+            ['a1_a2', 'A1', 'Я уже закончил свою домашнюю работу.', 'I have already finished my homework.', '[КТО] + have already + [V3/ed]', 'Present Perfect с наречием already перед смысловым глаголом.'],
+            ['a1_a2', 'A1', 'Она еще не видела этот новый фильм.', 'She has not seen this new movie yet.', '[КТО] + has not + [V3] + yet', 'Наречие yet ставится в самом конце отрицательного предложения.'],
+            ['a1_a2', 'A1', 'Ты должен носить шлем здесь.', 'You must wear a helmet here.', '[КТО] + must + [V1]', 'Модальный глагол must выражает строгое обязательное правило.'],
+            ['a1_a2', 'A1', 'Тебе следует спать как минимум восемь часов.', 'You should sleep at least eight hours.', '[КТО] + should + [V1]', 'Модальный глагол should выражает совет и рекомендацию.'],
+            ['a1_a2', 'A1', 'Я могу плавать очень быстро.', 'I can swim very fast.', '[КТО] + can + [V1]', 'Модальный глагол can для физической способности.'],
+            ['a1_a2', 'A2', 'Мой брат выше меня.', 'My brother is taller than me.', '[Сущ] + is + [прил-er] + than...', 'Сравнительная степень коротких прилагательных с суффиксом -er.'],
+            ['a1_a2', 'A2', 'Это самый опасный район в городе.', 'This is the most dangerous district in the city.', 'the most + [длинное прил]', 'Превосходная степень для длинных прилагательных с the most.'],
+            ['a1_a2', 'A2', 'У него есть машина, но он редко водит её.', 'He has a car but he rarely drives it.', '[КТО] + has... but + rarely + [V-s]', 'Наречие частоты rarely ставится перед смысловым глаголом.'],
+            ['a1_a2', 'A2', 'Мы собираемся переехать в новый дом в следующем месяце.', 'We are going to move to a new house next month.', 'are going to + [V1]', 'To be going to для заранее спланированного действия.'],
+            ['a1_a2', 'A2', 'Что ты делал вчера в семь вечера?', 'What were you doing yesterday at seven pm?', 'What were + [КТО] + [V-ing]?', 'Past Continuous для действия в точную точку времени в прошлом.'],
+            ['a1_a2', 'A2', 'Когда я пришел домой, она готовила ужин.', 'When I came home she was cooking dinner.', 'When + Past Simple , Past Continuous', 'Короткое фоновое действие перебивает длинный процесс.'],
+            ['a1_a2', 'A2', 'Если погода будет хорошей, мы пойдем на пляж.', 'If the weather is good we will go to the beach.', 'If + Present Simple , will + [V1]', 'First Conditional: в части с IF будущее время НЕ ставится.'],
+            ['a1_a2', 'A2', 'Я встречу тебя на автобусной остановке.', 'I will meet you at the bus stop.', 'will meet + AT the bus stop', 'Предлог AT для конкретной точки в пространстве.'],
+            ['a1_a2', 'A2', 'Ключи лежат на столе в гостиной.', 'The keys are on the table in the living room.', 'ON the table + IN the room', 'ON для поверхности стола, IN для объема комнаты.'],
+            ['a1_a2', 'A2', 'Он родился в июле 1995 года.', 'He was born in July in nineteen ninety five.', 'was born + IN [месяц] + IN [год]', 'Предлог IN используется с месяцами и годами.'],
+            ['a1_a2', 'A2', 'Мы обычно ездим за город по выходным.', 'We usually go out of town on weekends.', 'usually go... + ON weekends', 'Предлог ON для дней недели и выходных.'],
+            ['a1_a2', 'A2', 'Ты вчера купил продукты в супермаркете?', 'Did you buy groceries at the supermarket yesterday?', 'Did + [КТО] + buy... + yesterday?', 'Вопрос в Past Simple с правильным порядком места и времени.'],
+            ['a1_a2', 'A2', 'Она не рассказала мне свой секрет.', 'She did not tell me her secret.', '[КТО] + did not tell + [КОМУ]', 'Глагол tell требует прямого дополнения лица (tell me, tell him).'],
+            ['a1_a2', 'A2', 'Я думаю, что завтра пойдет дождь.', 'I think it will rain tomorrow.', 'I think + it will rain...', 'Прогноз на будущее на основе личного мнения через will.'],
+            ['a1_a2', 'A2', 'Эта комната намного светлее, чем та.', 'This room is much brighter than that one.', 'is much + [прил-er] + than...', 'Усилитель much перед сравнительной степенью (much brighter).'],
+            ['a1_a2', 'A2', 'Он забыл закрыть входную дверь.', 'He forgot to close the front door.', 'forgot to + [V1]', 'Forget to do something = забыть сделать необходимое действие.'],
+            ['a1_a2', 'A2', 'Я хочу показать тебе мои новые фотографии.', 'I want to show you my new photos.', 'want to + show + [КОМУ] + [ЧТО]', 'После want всегда идет частица to перед следующим глаголом.'],
+            ['a1_a2', 'A2', 'Почему ты не позвонил мне вчера?', 'Why did not you call me yesterday?', 'Why did not + [КТО] + [V1]?', 'Отрицательный специальный вопрос в Past Simple.'],
+            ['a1_a2', 'A2', 'Она часто оставляет телефон дома.', 'She often leaves her phone at home.', 'often leaves... AT home', 'Leaves с окончанием -s + устойчивый предлог at home.'],
+            ['a1_a2', 'A2', 'Мы провели два часа в аэропорту.', 'We spent two hours at the airport.', 'spent [время] + AT the airport', 'Вторая форма неправильного глагола spend -> spent.'],
+            ['a1_a2', 'A2', 'Ты можешь помочь мне донести эту тяжелую сумку?', 'Can you help me carry this heavy bag?', 'Can you help me + [V1]?', 'Просьба через can you help me без частицы to.'],
+            ['a1_a2', 'A2', 'Я не знаю ответа на этот вопрос.', 'I do not know the answer to this question.', 'do not know + answer TO...', 'Существительное answer требует предлога TO (answer to the question).'],
+            ['a1_a2', 'A2', 'Они уехали в отпуск две недели назад.', 'They went on vacation two weeks ago.', 'went on vacation + [время] ago', 'Маркер ago ставится строго после указания временного отрезка.'],
+            ['a1_a2', 'A2', 'В этом ресторане всегда много людей.', 'There are always many people in this restaurant.', 'There are always + [сущ во мн.ч.]', 'Конструкция There is / There are для наличия объектов где-то.'],
+            ['a1_a2', 'A2', 'Вчера на улице не было ветра.', 'There was no wind outside yesterday.', 'There was no + [неисчисляемое]', 'Отрицание наличия в прошлом через There was no.'],
+            ['a1_a2', 'A2', 'Тебе не нужно приходить так рано.', 'You do not need to come so early.', 'do not need to + [V1]', 'Отсутствие необходимости в настоящем через do not need to.'],
+            ['b1', 'B1', 'Нам нужно выяснить, где находится этот отель.', 'We need to find out where this hotel is located.', 'find out + where [сущ] is...', 'Фразовый глагол find out (выяснить) + косвенный порядок слов.'],
+            ['b1', 'B1', 'Я продолжал работать, хотя чувствовал сильную усталость.', 'I went on working although I felt very tired.', 'went on + [V-ing] + although...', 'Go on doing = продолжать процесс. Связка although = хотя.'],
+            ['b1', 'B1', 'Они решили отложить поездку до следующей весны.', 'They decided to put off the trip until next spring.', 'put off (фразовый глагол) + until...', 'Put off = откладывать на потом (синоним postpone).'],
+            ['b1', 'B1', 'Не сдавайся, у тебя все получится.', 'Do not give up you will succeed.', 'give up (фразовый) + will succeed', 'Give up = капитулировать, бросать начатое.'],
+            ['b1', 'B1', 'Оказалось, что он был прав с самого начала.', 'It turned out that he was right from the beginning.', 'It turned out that...', 'Устойчивая связка It turned out that = "оказалось, что".'],
+            ['b1', 'B1', 'Я ищу свои ключи уже полчаса.', 'I have been looking for my keys for half an hour.', 'have been looking for + [период]', 'Present Perfect Continuous для действия, начавшегося в прошлом и длящегося до сих пор.'],
+            ['b1', 'B1', 'Каждый человек имеет право совершить ошибку.', 'Everyone has the right to make a mistake.', 'make a mistake (коллокация с make)', 'С ошибками ВСЕГДА используется make a mistake, а не do.'],
+            ['b1', 'B1', 'Он зарабатывает много денег, работая в сфере технологий.', 'He makes a lot of money working in tech.', 'makes a lot of money + [V-ing]', 'Зарабатывать деньги = make money, а не earn/do.'],
+            ['b1', 'B1', 'Мы должны принять важное решение сегодня вечером.', 'We must make an important decision tonight.', 'make a decision (коллокация)', 'Принять решение = make a decision.'],
+            ['b1', 'B1', 'Я сделаю все возможное, чтобы сдать этот экзамен.', 'I will do my best to pass this exam.', 'do my best (коллокация с do)', 'Сделать все возможное = do one\'s best.'],
+            ['b1', 'B1', 'Вести бизнес с этой компанией очень безопасно.', 'Doing business with this company is very safe.', 'Doing business (герундий в роли подлежащего)', 'Вести дела/бизнес = do business.'],
+            ['b1', 'B1', 'Он избегает разговоров о своих личных проблемах.', 'He avoids talking about his personal problems.', 'avoid + [V-ing]', 'Глагол avoid ВСЕГДА требует после себя герундия на -ing.'],
+            ['b1', 'B1', 'Я предложил взять такси, чтобы не опоздать.', 'I suggested taking a taxi so as not to be late.', 'suggest + [V-ing]', 'После suggest никогда не ставится to! Всегда suggest doing.'],
+            ['b1', 'B1', 'Она отказалась подписать этот подозрительный документ.', 'She refused to sign this suspicious document.', 'refused to + [V1]', 'После refuse всегда идет инфинитив с частицей to.'],
+            ['b1', 'B1', 'Мы не можем позволить себе купить эту дорогую квартиру.', 'We cannot afford to buy this expensive apartment.', 'cannot afford to + [V1]', 'Afford to do = позволить себе финансово.'],
+            ['b1', 'B1', 'Он пообещал вернуть долг в конце недели.', 'He promised to pay back the debt at the end of the week.', 'promised to + pay back...', 'Promise to do = обещать сделать.'],
+            ['b1', 'B1', 'Честно говоря, этот фильм был довольно скучным.', 'To be honest this movie was quite boring.', 'To be honest (разговорный филлер)', 'Разговорная вводная конструкция для выражения искреннего мнения.'],
+            ['b1', 'B1', 'Вообще-то, я уже встречался с ним раньше.', 'Actually I have already met him before.', 'Actually (филлер контраста)', 'Actually = на самом деле / вообще-то.'],
+            ['b1', 'B1', 'Кстати, где ты нашел эту полезную статью?', 'By the way where did you find this useful article?', 'By the way + [вопрос]', 'By the way = между прочим / кстати.'],
+            ['b1', 'B1', 'В этом предложении действительно есть логика.', 'That proposal really makes a lot of sense.', 'makes a lot of sense', 'Иметь смысл / быть логичным = make sense.'],
+            ['b1', 'B1', 'Я сомневаюсь, что они согласятся на наши условия.', 'I doubt that they will agree to our terms.', 'I doubt that + will agree to...', 'Глагол doubt (сомневаться) + предлог agree TO.'],
+            ['b1', 'B1', 'Я был истощен после долгой рабочей недели.', 'I was exhausted after the long work week.', 'exhausted (сильное прил вместо very tired)', 'Exhausted уже содержит смысл "крайне уставший".'],
+            ['b1', 'B1', 'Это критически важно для нашего общего успеха.', 'This is crucial for our mutual success.', 'crucial (вместо very important)', 'Crucial = критически важный, решающий.'],
+            ['b1', 'B1', 'Он очень упрямый и никогда не слушает советов.', 'He is very stubborn and never listens to advice.', 'stubborn + listens to advice', 'Advice в английском неисчисляемое (без артикля a).'],
+            ['b1', 'B1', 'Нам нужен надежный человек для этого проекта.', 'We need a reliable person for this project.', 'reliable person', 'Reliable = надежный, верный.'],
+            ['b1', 'B1', 'Они постоянно жалуются на высокую арендную плату.', 'They constantly complain about the high rent.', 'complain ABOUT...', 'Глагол complain требует предлога about.'],
+            ['b1', 'B1', 'У нас строгий дедлайн на этой неделе.', 'We have a tight deadline this week.', 'tight deadline', 'Жесткий дедлайн в английском передается словом tight.'],
+            ['b1', 'B1', 'Я завтра улетаю в Берлин в девять утра.', 'I am flying to Berlin tomorrow at nine am.', '[КТО] + am flying (Present Continuous для планов)', 'Present Continuous для зафиксированных в календаре планов.'],
+            ['b1', 'B1', 'Пока я готовил обед, зазвонил телефон.', 'While I was cooking lunch the phone rang.', 'While + Past Continuous , Past Simple', 'While подчеркивает длительность процесса на фоне короткого звонка.'],
+            ['b1', 'B1', 'Я не видел его с тех пор, как мы закончили университет.', 'I have not seen him since we graduated from university.', 'have not seen + SINCE [точка в прошлом]', 'Предлог since (с тех пор как) связывает Past Simple и Present Perfect.'],
+            ['b1', 'B1', 'Он пришел домой вовремя, несмотря на плохую погоду.', 'He came home on time despite the bad weather.', 'came home on time + despite...', 'On time = точно по расписанию; In time = вовремя, к сроку.'],
+            ['b1', 'B1', 'Вот почему я решил выучить английский язык.', 'That is why I decided to learn English.', 'That is why + [причина-следствие]', 'Конструкция That is why = "вот почему / именно поэтому".'],
+            ['b1', 'B1', 'Я не уверен, смогу ли я прийти завтра.', 'I am not sure if I can come tomorrow.', 'not sure + IF (в значении "ли")', 'Союз if в придаточных изъяснительных переводится как русская частица "ли".'],
+            ['b1', 'B1', 'Он побежал изо всех сил, чтобы успеть на поезд.', 'He ran as fast as possible in order to catch the train.', 'in order to + [V1]', 'In order to = "для того, чтобы" (целевой оборот).'],
+            ['b1', 'B1', 'Этот экзамен был проще простого.', 'This exam was a piece of cake.', 'a piece of cake (идиома)', 'Идиома a piece of cake = проще простого, пара пустяков.'],
+            ['b1', 'B1', 'Мы устали, давайте закругляться на сегодня.', 'We are tired let us call it a day.', 'call it a day (идиома)', 'Call it a day = закончить работу на сегодня.'],
+            ['b1', 'B1', 'Она внезапно позвонила мне вчера ночью.', 'She called me out of the blue last night.', 'out of the blue (идиома)', 'Out of the blue = совершенно неожиданно, как снег на голову.'],
+            ['b1', 'B1', 'Решать тебе, куда мы поедем ужинать.', 'It is up to you where we go for dinner.', 'It is up to you...', 'It is up to you = решение за тобой, тебе выбирать.'],
+            ['b1', 'B1', 'С моей точки зрения, эта идея слишком рискованная.', 'From my point of view this idea is too risky.', 'From my point of view...', 'Вводная фраза для выражения мнения вместо частого I think.'],
+            ['b1', 'B1', 'Нам необходимо взвесить все плюсы и минусы.', 'We need to weigh all the pros and cons.', 'weigh the pros and cons', 'Взвесить за и против = weigh the pros and cons.'],
+            ['b1', 'B1', 'Я внезапно осознал, что оставил паспорт дома.', 'I suddenly realized that I had left my passport at home.', 'realized that I had left...', 'Past Perfect (had left) для действия, случившегося ДО момента осознания.'],
+            ['b1', 'B1', 'Пожалуйста, напомни мне купить хлеб по дороге домой.', 'Please remind me to buy bread on the way home.', 'remind [кого] to + [V1]', 'Remind to do = напомнить сделать что-то.'],
+            ['b1', 'B1', 'Я не ожидал встретить тебя в этом городе.', 'I did not expect to meet you in this city.', 'did not expect to + [V1]', 'Expect to do = ожидать / рассчитывать на что-то.'],
+            ['b1', 'B1', 'Шторм нанес огромный ущерб побережью.', 'The storm did huge damage to the coast.', 'DID huge damage (коллокация)', 'С ущербом и вредом используется глагол DO: do damage / do harm.'],
+            ['b1', 'B1', 'Ты должен приложить усилие, чтобы освоить этот навык.', 'You must make an effort to master this skill.', 'MAKE an effort (коллокация)', 'Приложить усилие = make an effort (с глаголом make!).'],
+            ['b1', 'B1', 'Они пришли к согласию после долгих переговоров.', 'They reached an agreement after long negotiations.', 'reached an agreement', 'Прийти к соглашению = reach an agreement.'],
+            ['b1', 'B1', 'Я привык пить кофе без сахара.', 'I am used to drinking coffee without sugar.', 'am used to + [V-ing]', 'Конструкция to be used to doing = иметь текущую привычку.'],
+            ['b1', 'B1', 'Она отказалась комментировать эту ситуацию.', 'She refused to comment on this situation.', 'refused to comment ON...', 'Глагол comment требует предлога on (comment on).'],
+            ['b1', 'B1', 'Это зависит не только от меня, но и от команды.', 'It depends not only on me but also on the team.', 'depends not only on... but also on...', 'Парный союз not only... but also... с одинаковыми предлогами.'],
+            ['b1', 'B1', 'Мы провели исследование перед запуском продукта.', 'We did research before launching the product.', 'DID research (коллокация)', 'Проводить исследование = do research (не make research!).'],
+            ['b2', 'B2', 'Тебе следовало сказать мне правду с самого начала.', 'You should have told me the truth from the beginning.', 'SHOULD HAVE + [V3]', 'Сожаление о прошлом действии другого человека.'],
+            ['b2', 'B2', 'Они, должно быть, забыли выключить свет перед уходом.', 'They must have forgotten to turn off the lights before leaving.', 'MUST HAVE + [V3]', '99% логическая дедукция о случившемся в прошлом.'],
+            ['b2', 'B2', 'Он не мог потратить все деньги за один день.', 'He could not have spent all the money in one day.', 'COULD NOT HAVE + [V3]', 'Уверенность в том, что действие в прошлом было физически невозможно.'],
+            ['b2', 'B2', 'Ты мог бы предупредить меня, что задерживаешься!', 'You could have warned me that you were running late!', 'COULD HAVE + [V3]', 'Упрек: у человека была возможность сделать, но он этого не сделал.'],
+            ['b2', 'B2', 'Зря мы купили столько еды, половина осталась.', 'We needn\'t have bought so much food half of it is left.', 'NEEDN\'T HAVE + [V3]', 'Действие совершено, но post factum оказалось совершенно ненужным.'],
+            ['b2', 'B2', 'Решение было принято советом директоров вчера.', 'The decision was made by the board of directors yesterday.', 'was made (Past Simple Passive)', 'Пассивный залог: объект важнее того, кто совершил действие.'],
+            ['b2', 'B2', 'Новый мост строится прямо сейчас в центре города.', 'A new bridge is being built right now in the city center.', 'is being built (Present Continuous Passive)', 'Пассивный залог в процессе: be + being + V3.'],
+            ['b2', 'B2', 'Этот отчет уже был отправлен всем клиентам.', 'This report has already been sent to all clients.', 'has been sent (Present Perfect Passive)', 'Пассивный результат в настоящем: have/has been + V3.'],
+            ['b2', 'B2', 'Машину починят к завтрашнему утру.', 'The car will be repaired by tomorrow morning.', 'will be repaired (Future Simple Passive)', 'Будущий пассив: will be + V3 + предлог дедлайна by.'],
+            ['b2', 'B2', 'Английский язык преподается во всех школах страны.', 'English is taught in all schools across the country.', 'is taught (Present Simple Passive)', 'Пассивный факт/рутина: am/is/are + V3.']
+        ];
+
+        // 3. ДОПОЛНИТЕЛЬНЫЙ БЛОК 2 (100 ШТУК)
+        const EXTRA_DRILLS_PART_2 = [
+            ['b2', 'B2', 'Если бы у меня было больше времени, я бы выучил испанский.', 'If I had more time I would learn Spanish.', 'If + Past Simple , would + [V1]', 'Second Conditional: гипотетическое, нереальное условие в настоящем.'],
+            ['b2', 'B2', 'На твоем месте я бы не стал подписывать этот договор.', 'If I were you I would not sign this contract.', 'If I were you , would not + [V1]', 'Классический совет через форму сослагательного наклонения were.'],
+            ['b2', 'B2', 'Если бы ты позвонил мне вчера, я бы помог тебе.', 'If you had called me yesterday I would have helped you.', 'If + [Had + V3] , would have + [V3]', 'Third Conditional: полностью нереальное условие в прошлом (поезд ушел).'],
+            ['b2', 'B2', 'Жаль, что я не умею играть на гитаре.', 'I wish I could play the guitar.', 'I wish I could + [V1]', 'Wish о текущей неспособности что-то сделать.'],
+            ['b2', 'B2', 'Жаль, что мы не послушали совет эксперта.', 'I wish we had listened to the expert\'s advice.', 'I wish + [Had + V3]', 'Wish о прошлой фатальной ошибке.'],
+            ['b2', 'B2', 'Хоть бы ты перестал шуметь в этой комнате!', 'I wish you would stop making noise in this room!', 'I wish you WOULD + [V1]', 'Wish с would выражает сильное раздражение чужим поведением.'],
+            ['b2', 'B2', 'Раньше я ненавидел оливки, а теперь они мне нравятся.', 'I used to hate olives but now I like them.', 'used to + [V1] ... but now...', 'Used to для прошлых вкусов и состояний, которые изменились.'],
+            ['b2', 'B2', 'Мне потребовалось два месяца, чтобы привыкнуть к левостороннему движению.', 'It took me two months to get used to driving on the left.', 'got used to + [V-ing]', 'Get used to doing = процесс привыкания и адаптации к новой среде.'],
+            ['b2', 'B2', 'Ты ведь знаешь его сестру, не так ли?', 'You know his sister don\'t you?', 'Утверждение (+) , don\'t you (?)', 'Разделительный вопрос Tag Question с противоположным знаком.'],
+            ['b2', 'B2', 'Они ведь не поехали в горы, правда?', 'They didn\'t go to the mountains did they?', 'Отрицание (-) , did they (?)', 'Tag Question с отрицательным началом и положительным хвостиком.'],
+            ['b2', 'B2', 'Давай сделаем перерыв, а?', 'Let\'s take a short break shall we?', 'Let\'s... , SHALL WE (?)', 'Специальный хвостик shall we используется только с формой Let\'s.'],
+            ['b2', 'B2', 'Я ведь прав, не так ли?', 'I am right aren\'t I?', 'I am... , AREN\'T I (?)', 'Уникальное исключение: для I am разделительный хвостик всегда aren\'t I.'],
+            ['b2', 'B2', 'Чем раньше мы начнем, тем быстрее закончим проект.', 'The sooner we start the faster we will finish the project.', 'The [er] , the [er]', 'Формула двойного сравнения с короткими наречиями sooner / faster.'],
+            ['b2', 'B2', 'Этот автомобиль намного дороже, но гораздо надежнее.', 'This car is way more expensive but far more reliable.', 'way more... far more...', 'Разговорные усилители сравнительной степени: way more и far more.'],
+            ['b2', 'B2', 'То, что поразило меня больше всего — это его спокойствие.', 'What struck me most was his complete calmness.', 'WHAT [действие] WAS [сущ]', 'Cleft sentence для акцентирования внимания на эмоции или факте.'],
+            ['b2', 'B2', 'Все, что мы просим — это справедливые условия труда.', 'All we ask for is fair working conditions.', 'ALL [мы делаем] IS...', 'Cleft sentence со словом ALL = "все, что нам нужно / все, чего мы просим".'],
+            ['b2', 'B2', 'Он сказал мне, что не сможет прийти на встречу.', 'He told me that he would not be able to come to the meeting.', 'told me that he WOULD not be able to...', 'Согласование времен: can не может остаться, переходит в would be able to.'],
+            ['b2', 'B2', 'Она спросила меня, где я купил этот ноутбук.', 'She asked me where I had bought that laptop.', 'asked me WHERE I had bought...', 'Косвенный вопрос: прямой порядок слов и сдвиг времени в Past Perfect.'],
+            ['b2', 'B2', 'Я встретил женщину, чей сын учится со мной.', 'I met a woman whose son studies with me.', 'whose [существительное]', 'Относительное местоимение whose указывает на принадлежность ("чей").'],
+            ['b2', 'B2', 'Он потерял паспорт, что задержало всю группу.', 'He lost his passport which delayed the whole group.', '..., which [глагол]', 'Which после запятой относится ко всей предыдущей ситуации целиком.'],
+            ['b2', 'B2', 'Человек, с которым я вел переговоры, был очень вежлив.', 'The person with whom I negotiated was very polite.', 'with WHOM (формальный стиль)', 'Whom используется после предлогов в формальном контексте.'],
+            ['b2', 'B2', 'Несмотря на то, что у него не было опыта, его наняли.', 'Although he lacked experience he was hired.', 'Although + [полноценное предложение]', 'Although требует после себя полноценной грамматической основы.'],
+            ['b2', 'B2', 'Он не пришел на работу по причине внезапной болезни.', 'He did not come to work due to a sudden illness.', 'due to + [существительное]', 'Due to = по причине / вследствие чего-то.'],
+            ['b2', 'B2', 'Я предпочитаю читать книги, в то время как мой брат смотрит телевизор.', 'I prefer reading books whereas my brother watches TV.', '..., whereas [контраст]', 'Whereas используется для демонстрации резкого контраста фактов.'],
+            ['b2', 'B2', 'Закончив презентацию, он ответил на все вопросы.', 'Having finished the presentation he answered all questions.', 'Having + [V3] , [действие в прошлом]', 'Перфектное деепричастие: действие 1 завершилось до действия 2.'],
+            ['b2', 'B2', 'Слушая этот подкаст, я записал несколько отличных идей.', 'Listening to this podcast I wrote down several great ideas.', '[V-ing] , [действие в прошлом]', 'Простое причастие настоящего времени для одновременных действий.'],
+            ['b2', 'B2', 'Он ушел молча, не сказав ни единого слова.', 'He left quietly without saying a single word.', 'without + [V-ing]', 'После предлога without глагол ВСЕГДА стоит в форме герундия (-ing).'],
+            ['b2', 'B2', 'Я с нетерпением жду встречи с вами на следующей неделе.', 'I am looking forward to meeting you next week.', 'look forward to + [V-ing]', 'В фразе look forward to частица to является предлогом, поэтому идет герундий!'],
+            ['b2', 'B2', 'Нет смысла спорить с человеком, который не слушает.', 'There is no point in arguing with someone who does not listen.', 'There is no point in + [V-ing]', 'Устойчивая конструкция There is no point in doing = нет смысла делать.'],
+            ['b2', 'B2', 'Я не мог не рассмеяться, когда услышал эту шутку.', 'I could not help laughing when I heard that joke.', 'could not help + [V-ing]', 'Идиома can\'t help doing = не мочь удержаться от какого-то действия.'],
+            ['b2', 'B2', 'Эта книга определенно стоит того, чтобы её прочитать.', 'This book is definitely worth reading.', 'is worth + [V-ing]', 'Конструкция to be worth doing = стоить того, чтобы сделать.'],
+            ['b2', 'B2', 'Он признал, что допустил серьезную ошибку в отчете.', 'He admitted making a serious mistake in the report.', 'admitted + [V-ing]', 'Глагол admit (признавать) управляет последующим герундием на -ing.'],
+            ['b2', 'B2', 'Мы договорились встретиться у главного входа.', 'We agreed to meet near the main entrance.', 'agreed to + [V1]', 'Глагол agree требует инфинитива с частицей to.'],
+            ['b2', 'B2', 'Он притворился, что не заметил меня в толпе.', 'He pretended not to notice me in the crowd.', 'pretended not to + [V1]', 'Отрицательный инфинитив: частица not ставится перед to notice.'],
+            ['b2', 'B2', 'Я случайно наткнулся на старые фотографии на чердаке.', 'I came across some old photos in the attic.', 'came across (фразовый)', 'Фразовый глагол come across = случайно натолкнуться на вещь.'],
+            ['b2', 'B2', 'Она очень похожа на свою мать по характеру.', 'She takes after her mother in character.', 'takes after (фразовый)', 'Take after = быть похожим на родственника внешне или характером.'],
+            ['b2', 'B2', 'Наш старый автомобиль сломался прямо посреди шоссе.', 'Our old car broke down right in the middle of the highway.', 'broke down (фразовый)', 'Break down = ломаться (о механизмах, транспорте).'],
+            ['b2', 'B2', 'Мы не ладим друг с другом из-за разных взглядов.', 'We do not get along with each other due to different views.', 'get along with (фразовый)', 'Get along with = ладить, находить общий язык с человеком.'],
+            ['b2', 'B2', 'Он придумал гениальное решение этой проблемы.', 'He came up with an ingenious solution to this problem.', 'came up with (фразовый)', 'Come up with = сгенерировать мысль, выдать решение.'],
+            ['b2', 'B2', 'Тебе нужно наверстать упущенный материал.', 'You need to catch up on the missed material.', 'catch up on (фразовый)', 'Catch up on = догонять, наверстывать упущенное.'],
+            ['b2', 'B2', 'Она воспитывает двоих детей совершенно одна.', 'She is bringing up two children entirely on her own.', 'bringing up (фразовый)', 'Bring up = воспитывать детей.'],
+            ['b2', 'B2', 'Я не могу смириться с таким неуважительным поведением.', 'I cannot put up with such disrespectful behavior.', 'put up with (фразовый)', 'Put up with = терпеть, мириться с неприятным.'],
+            ['b2', 'B2', 'Они исчерпали все свои финансовые ресурсы.', 'They ran out of all their financial resources.', 'ran out of (фразовый)', 'Run out of = исчерпать запасы, когда что-то закончилось.'],
+            ['b2', 'B2', 'Он неожиданно появился на вечеринке без приглашения.', 'He showed up at the party unexpectedly without an invitation.', 'showed up (фразовый)', 'Show up = явиться, объявиться на публике.'],
+            ['b2', 'B2', 'Это мероприятие оказалось огромным успехом для всей команды.', 'This event turned out to be a massive success for the whole team.', 'turned out to be...', 'Turn out to be = оказаться в итоге.'],
+            ['c1_c2', 'C1', 'Едва я вошел в здание, как сработала пожарная тревога.', 'Hardly had I entered the building when the fire alarm went off.', 'Hardly had I + [V3] + when...', 'Инверсия времени: вспомогательный had ставится перед подлежащим, союз when.'],
+            ['c1_c2', 'C1', 'Редко когда один человек оказывал такое глубокое влияние на отрасль.', 'Seldom has one individual exerted such a profound influence on an industry.', 'Seldom has + [КТО] + [V3]...', 'Инверсия с отрицательным наречием seldom (редко когда).'],
+            ['c1_c2', 'C1', 'Ни в коем случае нельзя передавать эти пароли третьим лицам.', 'On no account should these passwords be disclosed to third parties.', 'On no account should + [сущ] + be [V3]...', 'Инверсия категорического запрета: On no account should...'],
+            ['c1_c2', 'C1', 'Только после тщательного анализа мы осознали масштаб угрозы.', 'Only after a thorough analysis did we realize the scale of the threat.', 'Only after... DID we realize...', 'Инверсия с оборотом Only after: вспомогательный did ставится перед we.'],
+            ['c1_c2', 'C1', 'Если бы он не потерял наши ключевые данные, мы бы не работали в эти выходные.', 'If he had not lost our critical data we would not be working this weekend.', 'If + [Had + V3] , would not be [V-ing сейчас]', 'Mixed Conditional: действие в прошлом влечет непрерывный процесс в настоящем.'],
+            ['c1_c2', 'C1', 'Будь она более внимательной к деталям, она бы заметила эту несостыковку.', 'Were she more attentive to detail she would have noticed this discrepancy.', 'Were [КТО]... , would have [V3]', 'Инверсия в условном предложении вместо If she were (звучит академично).'],
+            ['c1_c2', 'C1', 'Если бы вы сообщили нам заранее, мы бы приняли соответствующие меры.', 'Had you informed us in advance we would have taken appropriate measures.', 'Had you [V3]... , would have [V3]', 'Инверсия вместо If you had informed (высший дипломатический стиль).'],
+            ['c1_c2', 'C1', 'Я не совсем уверен, что данная стратегия является экономически целесообразной.', 'I am not entirely convinced that this strategy is economically viable.', 'I am not entirely convinced that...', 'Хеджирование: деликатное выражение сомнения вместо прямого "Your strategy is bad".'],
+            ['c1_c2', 'C1', 'Возможно, имело место некоторое недопонимание относительно первоначальных сроков.', 'There may have been some misunderstanding regarding the original timeline.', 'There may have been... regarding...', 'Дипломатичное смягчение критики через модальную конструкцию may have been.'],
+            ['c1_c2', 'C1', 'Было бы преждевременным делать окончательные выводы на данном этапе.', 'It would be premature to draw definitive conclusions at this stage.', 'It would be premature to...', 'Академический оборот вежливого предостережения от поспешных шагов.'],
+            ['c1_c2', 'C1', 'Я убедил своего партнера пересмотреть финансовые условия сделки.', 'I got my partner to reconsider the financial terms of the deal.', 'GOT [кого] TO reconsider (каузатив)', 'Каузатив с глаголом GET требует обязательной частицы TO (get someone to do).'],
+            ['c1_c2', 'C1', 'Мы организуем аудит всей системы независимыми экспертами.', 'We will have the whole system audited by independent experts.', 'have [что] AUDITED (каузативный пассив)', 'Have something done: поручить сторонним специалистам выполнить работу.'],
+            ['c1_c2', 'C1', 'По слухам, генеральный директор планирует уйти в отставку в следующем квартале.', 'The chief executive is rumored to be stepping down next quarter.', '[КТО] + is rumored to be [V-ing]...', 'Сложная пассивная конструкция субъективного мнения (Personal Passive).'],
+            ['c1_c2', 'C1', 'Считается, что искусственный интеллект кардинально трансформирует рынок труда.', 'Artificial intelligence is widely believed to transform the labor market fundamentally.', '[Сущ] + is widely believed to + [V1]', 'Широко признанное убеждение через пассив: is widely believed to do.'],
+            ['c1_c2', 'C1', 'Совет директоров потребовал, чтобы финансовый директор подал в отставку.', 'The board demanded that the chief financial officer resign immediately.', 'demanded that [КТО] + RESIGN (Subjunctive)', 'Сослагательное наклонение: глагол resign стоит в базовой форме БЕЗ окончания -s.'],
+            ['c1_c2', 'C1', 'Крайне важно, чтобы все меры предосторожности соблюдались неукоснительно.', 'It is essential that all safety precautions be strictly observed.', 'essential that [сущ] BE [V3] (Subjunctive)', 'Пассивный сабджанктив: форма be не спрягается в are/were, а остается BE.'],
+            ['c1_c2', 'C1', 'Я настаиваю на том, чтобы каждый голос был учтен в протоколе.', 'I insist that every vote be counted in the official minutes.', 'insist that [сущ] BE counted', 'Формальный протокольный английский: insist that someone/something be.'],
+            ['c1_c2', 'C1', 'Сколь бы убедительным ни казался его аргумент, доказательств все еще недостаточно.', 'Compelling though his argument may seem the evidence remains insufficient.', '[Adjective] + though [сущ] may seem...', 'Фронтинг прилагательного compelling для выражения уступки оппоненту.'],
+            ['c1_c2', 'C1', 'Они и не подозревали о катастрофических последствиях своего решения.', 'Little did they suspect the catastrophic consequences of their decision.', 'Little did they suspect...', 'Художественная инверсия с little did: они совершенно не догадывались.'],
+            ['c1_c2', 'C1', 'Учитывая текущую геополитическую обстановку, мы вынуждены пересмотреть цепочки поставок.', 'Given the current geopolitical landscape we are forced to realign our supply chains.', 'Given [существительное] , we...', 'Оборот Given that / Given = "принимая во внимание / с учетом чего-то".'],
+            ['c1_c2', 'C1', 'Осознавая неотложность ситуации, руководство объявило чрезвычайное положение.', 'Recognizing the urgency of the situation management declared a state of emergency.', 'Recognizing [сущ] , [главная мысль]', 'Деепричастный оборот в роли причины: осознавая неотложность...'],
+            ['c1_c2', 'C1', 'В свете новых открытий предыдущая гипотеза считается несостоятельной.', 'In the light of new findings the previous hypothesis is deemed invalid.', 'In the light of... is deemed...', 'Высокий регистр: In the light of (в свете) + is deemed (считается / признается).'],
+            ['c1_c2', 'C1', 'Компания находится на грани банкротства из-за накопившихся долгов.', 'The company is on the verge of bankruptcy due to accumulated debts.', 'on the verge of [существительное]', 'Идиоматический предложный оборот On the verge of = "на волосок от / на грани".'],
+            ['c1_c2', 'C1', 'Ради сохранения стабильности мы пошли на определенные уступки.', 'For the sake of maintaining stability we made certain concessions.', 'For the sake of [V-ing / сущ]', 'For the sake of = ради / во имя какой-то цели.'],
+            ['c1_c2', 'C1', 'Касательно вашей недавней публикации, я хотел бы сделать одно уточнение.', 'With regard to your recent publication I would like to make a clarification.', 'With regard to [сущ]...', 'Официальный эквивалент слова about: With regard to / In regard to.'],
+            ['c1_c2', 'C1', 'Все операции проводятся в строгом соответствии с действующим законодательством.', 'All operations are conducted in strict compliance with current legislation.', 'in strict compliance with...', 'Юридический оборот in compliance with = в соответствии с нормами/законом.'],
+            ['c1_c2', 'C1', 'По большому счету, реформа оправдала возложенные на нее ожидания.', 'By and large the reform has lived up to expectations.', 'By and large + [главная мысль]', 'Бином By and large = по большому счету, в основном.'],
+            ['c1_c2', 'C1', 'Любые успешные переговоры требуют взаимных уступок с обеих сторон.', 'Any successful negotiation requires a fair amount of give and take.', 'give and take (бином)', 'Неразрывный бином give and take = готовность к компромиссу и диалогу.'],
+            ['c1_c2', 'C1', 'Они вернулись из экспедиции в целости и сохранности.', 'They returned from the perilous expedition safe and sound.', 'safe and sound (бином)', 'Устойчивая парная идиома safe and sound = невредимый, живой и здоровый.'],
+            ['c1_c2', 'C1', 'Рано или поздно правда станет известна общественности.', 'Sooner or later the truth will become known to the public.', 'Sooner or later...', 'Бином Sooner or later = рано или поздно, неизбежно.'],
+            ['c1_c2', 'C1', 'Его скептическое отношение было далеко не беспочвенным.', 'His skeptical attitude was not without foundation.', 'not without [сущ] (литота)', 'Литота: двойное отрицание not without для утверждения весомости причин.'],
+            ['c1_c2', 'C1', 'Утверждать, что инфляция стабилизировалась — едва ли преувеличение.', 'To state that inflation has stabilized is hardly an exaggeration.', 'hardly an exaggeration (литота)', 'Сдержанная фигура речи: едва ли преувеличение = сущая правда.'],
+            ['c1_c2', 'C1', 'Текущее состояние инфраструктуры оставляет желать лучшего.', 'The current state of infrastructure leaves much to be desired.', 'leaves much to be desired (идиома)', 'Элегантное английское преуменьшение: оставляет желать много лучшего.'],
+            ['c1_c2', 'C1', 'Суть проблемы заключается в нехватке квалифицированных специалистов.', 'The crux of the matter lies in the shortage of qualified specialists.', 'The crux of the matter lies in...', 'Риторическая связка: The crux of the matter = самая суть / корень проблемы.'],
+            ['c1_c2', 'C1', 'Как бы то ни было, мы обязаны продолжать реализацию утвержденного плана.', 'Be that as it may we are bound to continue implementing the approved plan.', 'Be that as it may , [мысль]', 'Коннектор высшего порядка: Be that as it may = как бы там ни было / тем не менее.'],
+            ['c1_c2', 'C1', 'Несмотря на турбулентность на рынке, наши ключевые показатели устояли.', 'Notwithstanding market turbulence our core metrics remained resilient.', 'Notwithstanding [сущ]...', 'Академический синоним despite: Notwithstanding.'],
+            ['c1_c2', 'C1', 'Оглядываясь назад, диверсификация наших активов оказалась спасительной.', 'In retrospect diversifying our portfolio proved to be our salvation.', 'In retrospect + [герундий]...', 'Ретроспективная связка: In retrospect (оглядываясь на прошлый опыт).'],
+            ['c1_c2', 'C1', 'Принимая во внимание все обстоятельства, это наиболее рациональный выбор.', 'All things considered this is the most rational course of action.', 'All things considered , ...', 'Риторический финал монолога: с учетом всех факторов / взвесив всё.'],
+            ['c1_c2', 'C1', 'Давайте не будем ходить вокруг да около и сразу перейдем к делу.', 'Let us not beat around the bush and cut straight to the chase.', 'cut straight to the chase (идиома)', 'Cut to the chase = перейти сразу к сути, опустив прелюдию.'],
+            ['c1_c2', 'C1', 'Позвольте мне побыть в роли критика, чтобы выявить слабые места вашей гипотезы.', 'Allow me to play devil\'s advocate to expose the vulnerabilities of your hypothesis.', 'play devil\'s advocate', 'Play devil\'s advocate = намеренно оппонировать, проверяя концепцию на прочность.'],
+            ['c1_c2', 'C2', 'Внедрение автоматизации привело к колоссальному росту производительности.', 'The implementation of automation resulted in an exponential increase in productivity.', 'The [Сущ] of [X] resulted in the [Сущ] of [Y]', 'Классическая C2-номинализация: абстрактные существительные вместо глаголов.'],
+            ['c1_c2', 'C2', 'Стремительная деградация экосистем требует немедленного глобального вмешательства.', 'The rapid degradation of ecosystems necessitates immediate global intervention.', 'The [Сущ] necessitates [Сущ]', 'C2 синтаксис: существительное + глагол высокой логической связи (necessitates).'],
+            ['c1_c2', 'C2', 'Вечно он оставляет важнейшие решения на последнюю минуту!', 'He will constantly leave crucial decisions until the eleventh hour!', '[КТО] + will constantly [V1]... at the eleventh hour', 'Will для упрямой раздражающей привычки + идиома the eleventh hour (последний момент).'],
+            ['c1_c2', 'C2', 'Даже не смей подвергать сомнению авторитет научного консенсуса.', 'Don\'t you dare question the authority of the scientific consensus.', 'Don\'t you dare + [V1]', 'Категорический эмоциональный оборот с модальным dare.'],
+            ['c1_c2', 'C2', 'Мы хотели бы инвестировать в проект, но нормативные ограничения не позволяют нам.', 'We would like to invest in the project but regulatory constraints prevent us from doing so.', '...prevent us from doing so (эллипсис)', 'Замена повторения глагольной группы конструкцией doing so.'],
+            ['c1_c2', 'C2', 'Повлияет ли это на рентабельность? Я полагаю, что нет.', 'Will this affect profitability? I assume not.', 'I assume not (редукция целого суждения)', 'Отрицательная субституция через NOT вместо длинного "I assume it will not affect".'],
+            ['c1_c2', 'C2', 'Если потребуется, мы готовы провести внеочередное заседание комитета.', 'If need be we are prepared to convene an extraordinary committee session.', 'If need be (устойчивый эллипсис)', 'Идиоматическое эллиптическое сокращение If need be = "если возникнет необходимость".'],
+            ['c1_c2', 'C2', 'Вниз по спирали полетели котировки акций после публикации отчета.', 'Down tumbled the stock prices following the publication of the report.', 'Down + [глагол движения] + [подлежащее]', 'Пространственный фронтинг движения (Down tumbled the prices) для максимального драматизма.'],
+            ['c1_c2', 'C2', 'Неотъемлемым элементом устойчивого лидерства является неподдельная эмпатия.', 'An indispensable component of sustainable leadership is genuine empathy.', 'An indispensable component of [X] is [Y]', 'Сверхточная академическая лексика уровня C2 (indispensable, genuine).'],
+            ['c1_c2', 'C2', 'Такое вопиющее несоответствие ставит под угрозу весь исследовательский проект.', 'Such a blatant discrepancy jeopardizes the integrity of the entire research endeavor.', 'discrepancy jeopardizes...', 'Уровень C2: blatant discrepancy (вопиющее расхождение) + jeopardizes (ставит под угрозу).'],
+            ['c1_c2', 'C2', 'Справедливости ради следует признать, что первоначальная гипотеза была небезупречна.', 'To be fair it must be acknowledged that the initial hypothesis was not flawless.', 'To be fair... it must be acknowledged that...', 'Безупречная форма уступки перед выдвижением контраргумента.'],
+            ['c1_c2', 'C2', 'Его ораторское мастерство оказало неизгладимое впечатление на аудиторию.', 'His eloquent rhetoric left an indelible impression on the audience.', 'eloquent rhetoric... indelible impression', 'Стилистически выверенные коллокации C2: eloquent rhetoric, indelible impression.'],
+            ['c1_c2', 'C2', 'Сложность задачи ни в коей мере не умаляет нашего энтузиазма.', 'The complexity of the task in no way diminishes our collective enthusiasm.', 'in no way diminishes...', 'Оборот in no way diminishes (ни в коей мере не принижает/не умаляет).'],
+            ['c1_c2', 'C2', 'Вместо того чтобы спорить о деталях, давайте взглянем на картину в целом.', 'Rather than squabbling over trivialities let us look at the bigger picture.', 'squabbling over trivialities... bigger picture', 'Идиоматичная C2 речь: squabble over trivialities (грызться из-за мелочей).'],
+            ['c1_c2', 'C2', 'Данное решение является квинтэссенцией многолетнего стратегического планирования.', 'This breakthrough serves as the quintessential manifestation of years of strategic planning.', 'the quintessential manifestation of...', 'Вершина лексического диапазона C2: quintessential manifestation (квинтэссенция проявления).']
+        ];
+
+        // АВТОМАТИЧЕСКАЯ РАСПАКОВКА И ДОБАВЛЕНИЕ В ОБЩИЙ ПУЛ ТРЕНАЖЕРА (ИТОГО 228 ЗАДАНИЙ)
+        const bgMapHelper = {
+            'a1_a2': ['var(--pos-bg)', 'var(--pos)'],
+            'b1': ['var(--primary-bg)', 'var(--primary)'],
+            'b2': ['var(--gold-bg)', 'var(--gold)'],
+            'c1_c2': ['var(--purple-bg)', 'var(--purple)']
+        };
+
+        EXTRA_DRILLS_PART_1.forEach(d => {
+            DRILLS.push({
+                cat: d[0], lvl: d[1],
+                badgeBg: bgMapHelper[d[0]][0], badgeColor: bgMapHelper[d[0]][1],
+                ru: d[2], en: d[3], skeleton: d[4], exp: d[5]
+            });
+        });
+
+        EXTRA_DRILLS_PART_2.forEach(d => {
+            DRILLS.push({
+                cat: d[0], lvl: d[1],
+                badgeBg: bgMapHelper[d[0]][0], badgeColor: bgMapHelper[d[0]][1],
+                ru: d[2], en: d[3], skeleton: d[4], exp: d[5]
+            });
+        });
+
+        // ENGINE STATE
+        let activeCategory = 'all';
+        let currentFilteredList = [];
+        let currentIndex = 0;
+        let isNotebookView = false;
+
+        const synth = window.speechSynthesis;
+
+        function speakWord(word, el) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
+            if (el) el.classList.add('speaking');
+            const clean = word.replace(/[^a-zA-Z']/g, '');
+            const u = new SpeechSynthesisUtterance(clean);
+            u.lang = 'en-US';
+            u.rate = 0.85;
+            u.onend = () => { if (el) el.classList.remove('speaking'); };
+            synth.speak(u);
+        }
+
+        function playWholePhrase(phrase) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            const u = new SpeechSynthesisUtterance(phrase);
+            u.lang = 'en-US';
+            u.rate = 0.9;
+            synth.speak(u);
+        }
+
+        function filterData() {
+            if (activeCategory === 'all') {
+                currentFilteredList = [...DRILLS];
+            } else {
+                currentFilteredList = DRILLS.filter(d => d.cat === activeCategory);
+            }
+            currentIndex = 0;
+        }
+
+        function renderCurrentCard() {
+            if (currentFilteredList.length === 0) return;
+            const item = currentFilteredList[currentIndex];
+
+            document.getElementById('promptRu').innerText = item.ru;
+            document.getElementById('hintText').innerText = item.skeleton;
+            document.getElementById('hintBox').style.display = 'none';
+
+            const badge = document.getElementById('levelBadge');
+            badge.innerText = `${item.lvl} Practice`;
+            badge.style.background = item.badgeBg;
+            badge.style.color = item.badgeColor;
+
+            document.getElementById('drillCounter').innerText = `${currentIndex + 1} / ${currentFilteredList.length}`;
+
+            // Reset Input & Feedback
+            const input = document.getElementById('userTextInput');
+            input.value = '';
+            input.disabled = false;
+            input.focus();
+
+            document.getElementById('feedbackBox').style.display = 'none';
+            document.getElementById('btnCheck').style.display = 'block';
+            document.getElementById('btnNext').style.display = 'none';
+        }
+
+        function toggleHint() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            const h = document.getElementById('hintBox');
+            h.style.display = (h.style.display === 'none' || !h.style.display) ? 'block' : 'none';
+        }
+
+        function normalizeText(text) {
+            return text
+                .toLowerCase()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function checkAnswer() {
+            const item = currentFilteredList[currentIndex];
+            const userVal = document.getElementById('userTextInput').value;
+            const normUser = normalizeText(userVal);
+            const normTarget = normalizeText(item.en);
+
+            const fbBox = document.getElementById('feedbackBox');
+            const fbTitle = document.getElementById('feedbackTitle');
+            const targetContainer = document.getElementById('targetSentenceContainer');
+            const grammarExp = document.getElementById('grammarExplanation');
+
+            fbBox.style.display = 'flex';
+
+            if (normUser === normTarget) {
+                if (typeof TMABridge !== 'undefined') TMABridge.haptic('medium');
+                fbBox.className = 'feedback-box feedback-success';
+                fbTitle.innerHTML = '🎉 Превосходно! Идеальный перевод и скелет.';
+                fbTitle.style.color = 'var(--pos)';
+            } else {
+                if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+                fbBox.className = 'feedback-box feedback-diff';
+                fbTitle.innerHTML = normUser.length === 0 ? '👀 Эталонный перевод:' : '⚠️ Сравните со своим вариантом:';
+                fbTitle.style.color = 'var(--gold)';
+            }
+
+            const wordsHtml = item.en.split(' ').map(w => `<span class="word" onclick="speakWord('${w}', this)">${w}</span>`).join(' ');
+            targetContainer.innerHTML = `
+                <button class="audio-btn" onclick="playWholePhrase('${item.en.replace(/'/g, "\\'")}')">🔊</button>
+                <div>${wordsHtml}</div>
+            `;
+
+            grammarExp.innerHTML = `<b>Скелет:</b> ${item.skeleton}<br><b>Разбор:</b> ${item.exp}`;
+
+            playWholePhrase(item.en);
+
+            document.getElementById('btnCheck').style.display = 'none';
+            document.getElementById('btnNext').style.display = 'block';
+        }
+
+        function nextCard() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+
+            // Freemium Paywall: Первые 10 заданий (индексы 0..9) бесплатны. Начиная с 10 — проверка доступа!
+            const nextIdx = currentIndex + 1;
+            if (nextIdx >= 10 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(nextIdx, 10)) {
+                    return; // Блокируем переход и показываем окно оплаты Stars
+                }
+            }
+
+            if (currentIndex < currentFilteredList.length - 1) {
+                currentIndex++;
+            } else {
+                currentIndex = 0;
+            }
+            renderCurrentCard();
+        }
+
+        document.getElementById('userTextInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('btnCheck').style.display !== 'none') {
+                    checkAnswer();
+                } else {
+                    nextCard();
+                }
+            }
+        });
+
+        function setCategory(cat, element) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            activeCategory = cat;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+            filterData();
+            if (!isNotebookView) {
+                renderCurrentCard();
+            } else {
+                renderNotebookList();
+            }
+        }
+
+        function toggleViewMode() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            isNotebookView = !isNotebookView;
+            const drillV = document.getElementById('drillView');
+            const noteV = document.getElementById('notebookView');
+            const btn = document.getElementById('viewToggleBtn');
+
+            if (isNotebookView) {
+                drillV.style.display = 'none';
+                noteV.style.display = 'flex';
+                btn.innerText = '⚡ Интерактивный тренажер';
+                renderNotebookList();
+            } else {
+                drillV.style.display = 'block';
+                noteV.style.display = 'none';
+                btn.innerText = '📖 Режим тетради';
+                renderCurrentCard();
+            }
+        }
+
+        function renderNotebookList() {
+            const container = document.getElementById('notebookListContainer');
+            container.innerHTML = '';
+
+            currentFilteredList.forEach((item, idx) => {
+                const isLocked = idx >= 10 && (!TMABridge || !TMABridge.isPremiumUser());
+                const row = document.createElement('div');
+                row.className = 'notebook-item';
+                row.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-size: 0.75rem; font-weight: 800; color: ${item.badgeColor};">${item.lvl} • Задание #${idx + 1} ${isLocked ? '🔒' : ''}</span>
+                        <button style="background: none; border: none; color: var(--primary); font-size: 0.75rem; font-weight: 700; cursor: pointer;" onclick="toggleNotebookAnswer(${idx})">Сверить ответ ▼</button>
+                    </div>
+                    <div class="notebook-ru">${idx + 1}. ${item.ru}</div>
+                    <div class="notebook-en" id="nbAns_${idx}">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button class="audio-btn" onclick="playWholePhrase('${item.en.replace(/'/g, "\\'")}')">🔊</button>
+                            <span>${item.en}</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Скелет: ${item.skeleton}</div>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function toggleNotebookAnswer(idx) {
+            // Freemium Paywall в режиме тетради
+            if (idx >= 10 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(idx, 10)) {
+                    return;
+                }
+            }
+
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            const el = document.getElementById(`nbAns_${idx}`);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            filterData();
+            renderCurrentCard();
+
+            if (typeof TMABridge !== 'undefined') {
+                TMABridge.setupBackButton('index.html');
+            }
+        });
+    </script>
+</body>
+</html>

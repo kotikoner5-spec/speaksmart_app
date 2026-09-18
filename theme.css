@@ -1,0 +1,387 @@
+﻿/* ==========================================================================
+   TMA ENGLISH ACCELERATOR - MASTER THEME
+   ========================================================================== */
+
+:root {
+    /* Основная палитра (Dark Premium) */
+    --bg-color: #0b0f19;
+    --card-bg: #151f32;
+    --card-border: #24324d;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary: #3b82f6;
+    
+    /* Семантические цвета и фоны для блоков */
+    --pos: #22c55e;
+    --pos-bg: rgba(34, 197, 94, 0.12);
+    --neg: #ef4444;
+    --neg-bg: rgba(239, 68, 68, 0.12);
+    --que: #3b82f6;
+    --que-bg: rgba(59, 130, 246, 0.12);
+    --gold: #f59e0b;
+    --gold-bg: rgba(245, 158, 11, 0.12);
+    --purple: #a855f7;
+    --purple-bg: rgba(168, 85, 247, 0.12);
+    --cyan: #06b6d4;
+    --cyan-bg: rgba(6, 182, 212, 0.12);
+    --rose: #f43f5e;
+    --rose-bg: rgba(244, 63, 94, 0.12);
+
+    /* Безопасные отступы для iOS (Safe Area) */
+    --sa-t: env(safe-area-inset-top, 0px);
+    --sa-b: env(safe-area-inset-bottom, 0px);
+    --sa-l: env(safe-area-inset-left, 0px);
+    --sa-r: env(safe-area-inset-right, 0px);
+}
+
+/* ==========================================================================
+   БАЗОВЫЙ СБРОС И ТИПОГРАФИКА
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   НАВИГАЦИЯ И ШАПКА (HEADER)
+   ========================================================================== */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: calc(56px + var(--sa-t));
+    padding-top: var(--sa-t);
+    background: rgba(11, 15, 25, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: calc(16px + var(--sa-l));
+    padding-right: calc(16px + var(--sa-r));
+    border-bottom: 1px solid var(--card-border);
+    z-index: 100;
+}
+
+.counter {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--primary);
+    background: rgba(59, 130, 246, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.swipe-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   СЛАЙДЕР И КАРТОЧКИ
+   ========================================================================== */
+.slider-container {
+    display: flex;
+    width: 100vw;
+    height: calc(100dvh - 56px - var(--sa-t));
+    margin-top: calc(56px + var(--sa-t));
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.slider-container::-webkit-scrollbar {
+    display: none;
+}
+
+.slide {
+    flex: 0 0 100vw;
+    width: 100vw;
+    height: 100%;
+    scroll-snap-align: start;
+    padding: 16px calc(16px + var(--sa-r)) calc(80px + var(--sa-b)) calc(16px + var(--sa-l));
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.3;
+}
+
+.section-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 12px 0 8px 0;
+}
+
+.note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   СТРОКИ (ROWS) И СКЕЛЕТЫ
+   ========================================================================== */
+.row {
+    margin-bottom: 10px;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.row-pos { background-color: var(--pos-bg); border-left: 4px solid var(--pos); }
+.row-neg { background-color: var(--neg-bg); border-left: 4px solid var(--neg); }
+.row-que { background-color: var(--que-bg); border-left: 4px solid var(--que); }
+.row-gold { background-color: var(--gold-bg); border-left: 4px solid var(--gold); }
+.row-purple { background-color: var(--purple-bg); border-left: 4px solid var(--purple); }
+.row-cyan { background-color: var(--cyan-bg); border-left: 4px solid var(--cyan); }
+.row-rose { background-color: var(--rose-bg); border-left: 4px solid var(--rose); }
+
+.type-tag {
+    font-weight: 900;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin-right: 6px;
+}
+.type-tag.pos { color: var(--pos); }
+.type-tag.neg { color: var(--neg); }
+.type-tag.que { color: var(--que); }
+
+.skeleton {
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    display: block;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   ИНТЕРАКТИВНЫЕ СЛОВА И АУДИО
+   ========================================================================== */
+.example-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 6px;
+}
+
+.audio-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform 0.1s;
+}
+.audio-btn:active { transform: scale(0.9); }
+
+.text-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.en-phrase {
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.word {
+    display: inline-block;
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+    color: #60a5fa;
+    border-bottom: 1px dashed rgba(96, 165, 250, 0.4);
+    transition: all 0.15s ease;
+}
+
+.word:active, .word.speaking {
+    background: var(--primary);
+    color: #ffffff;
+    transform: scale(1.05);
+    border-bottom-color: transparent;
+}
+
+.ru-phrase {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+/* ==========================================================================
+   КНОПКИ НАВИГАЦИИ (ЭКРАННЫЕ)
+   ========================================================================== */
+.nav-arrow {
+    position: fixed;
+    bottom: calc(16px + var(--sa-b));
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid var(--card-border);
+    color: var(--text-main);
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    z-index: 99;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: background 0.2s;
+}
+.nav-arrow:active { background: var(--primary); border-color: var(--primary); }
+.nav-prev { left: calc(16px + var(--sa-l)); }
+.nav-next { right: calc(16px + var(--sa-r)); }
+
+/* ==========================================================================
+   ПЭЙВОЛЛ (МОДАЛЬНОЕ ОКНО ОПЛАТЫ TELEGRAM STARS)
+   ========================================================================== */
+.paywall-overlay {
+    display: none; /* Скрыто по умолчанию, управляется через JS */
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 15, 25, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.paywall-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+
+.paywall-card {
+    background: var(--card-bg);
+    border: 1px solid var(--gold);
+    border-radius: 24px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.paywall-overlay.visible .paywall-card {
+    transform: translateY(0);
+}
+
+.paywall-icon {
+    font-size: 3.5rem;
+    margin-bottom: 12px;
+    line-height: 1;
+}
+
+.paywall-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.paywall-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.paywall-features {
+    text-align: left;
+    background: rgba(0,0,0,0.2);
+    padding: 16px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.paywall-feature-item {
+    font-size: 0.85rem;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.paywall-btn {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    border: none;
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    transition: transform 0.1s;
+}
+
+.paywall-btn:active {
+    transform: scale(0.97);
+}
+
+.paywall-btn-stars {
+    font-size: 1.2rem;
+}

@@ -1,0 +1,1142 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Тренажер диалогов: 30 жизненных переписок</title>
+    
+    <!-- Подключение единой дизайн-системы и Telegram SDK -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tma-bridge.js"></script>
+
+    <style>
+        /* Специфические стили интерактивного мессенджера */
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            height: calc(60px + var(--sa-t));
+            padding-top: var(--sa-t);
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: calc(14px + var(--sa-l));
+            padding-right: calc(14px + var(--sa-r));
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .btn-menu {
+            background: #1f2937;
+            border: 1px solid var(--card-border);
+            color: #60a5fa;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .contact-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .contact-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .contact-status {
+            font-size: 0.7rem;
+            color: var(--pos);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--pos);
+        }
+
+        .progress-pill {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--gold);
+            background: var(--gold-bg);
+            padding: 4px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--gold);
+        }
+
+        .chat-stream {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+        .chat-stream::-webkit-scrollbar { display: none; }
+
+        .msg-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 0.92rem;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .msg-incoming {
+            background: #1f2937;
+            color: #f1f5f9;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-outgoing {
+            background: #2563eb;
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-top-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .msg-incoming .word { color: #93c5fd; }
+        .msg-outgoing .word { color: #e0f2fe; }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: #1f2937;
+            padding: 10px 14px;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            gap: 4px;
+            align-items: center;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        .prompt-dock {
+            background: #111827;
+            border-top: 1px solid var(--card-border);
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .task-title {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        .hint-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .task-ru {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            line-height: 1.35;
+        }
+
+        .skeleton-hint {
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-family: ui-monospace, Consolas, monospace;
+            display: none;
+        }
+
+        .input-bar {
+            background: #0b0f19;
+            padding: 10px 14px calc(14px + var(--sa-b)) 14px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #1f2937;
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+        .chat-input:focus { border-color: var(--primary); }
+
+        .send-btn {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .drawer-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 100;
+            align-items: flex-end;
+        }
+
+        .drawer-card {
+            background: #111827;
+            border-top: 1px solid var(--card-border);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 16px;
+            padding-bottom: calc(20px + var(--sa-b));
+            width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .drawer-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .drawer-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .drawer-item {
+            background: #1f2937;
+            border: 1px solid var(--card-border);
+            padding: 10px 12px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .drawer-item.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.15); }
+
+        .drawer-item-avatar { font-size: 1.4rem; }
+        .drawer-item-content { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .drawer-item-title { font-size: 0.88rem; font-weight: 700; color: #fff; }
+        .drawer-item-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+        .variants-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 110;
+            padding: 16px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .variant-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--card-border);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="chat-header">
+        <button class="btn-menu" onclick="openDrawer()">☰ Все диалоги (30)</button>
+        <div class="contact-info">
+            <div class="avatar" id="contactAvatar">🏠</div>
+            <div class="contact-text">
+                <div class="contact-name" id="contactName">Mr. Henderson</div>
+                <div class="contact-status"><span class="status-dot"></span> Online</div>
+            </div>
+        </div>
+        <div class="progress-pill" id="progressPill">Шаг 1 из 3</div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="chat-stream" id="chatStream">
+        <div class="typing-indicator" id="typingIndicator">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+    </div>
+
+    <!-- Task Prompt & Skeleton Dock -->
+    <div class="prompt-dock">
+        <div class="task-header">
+            <div class="task-title">🎯 Ваша задача (Передайте мысль на English):</div>
+            <button class="hint-toggle-btn" onclick="toggleSkeletonHint()">💡 Подсказка скелета</button>
+        </div>
+        <div class="task-ru" id="taskRu">Загрузка задачи...</div>
+        <div class="skeleton-hint" id="skeletonHint">...</div>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+        <input type="text" id="chatInput" class="chat-input" placeholder="Напечатайте ответ на английском..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <button class="send-btn" onclick="handleSend()">➤</button>
+    </div>
+
+    <!-- Drawer: 30 Scenarios Selector -->
+    <div class="drawer-modal" id="drawerModal" onclick="closeDrawer(event)">
+        <div class="drawer-card" onclick="event.stopPropagation()">
+            <div class="drawer-header">
+                <div class="drawer-title">Выберите диалог:</div>
+                <button style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;" onclick="closeDrawer()">✕</button>
+            </div>
+            <div class="drawer-list" id="drawerList"></div>
+        </div>
+    </div>
+
+    <!-- Variants Help Modal -->
+    <div class="variants-modal" id="variantsModal">
+        <div class="card" style="max-width: 500px; width: 100%; display: flex; flex-direction: column; gap: 12px;">
+            <div style="font-size: 0.95rem; font-weight: 800; color: var(--gold);">⚠️ Сравните со своими словами:</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Нажмите на любой эталонный вариант, чтобы вставить его:</div>
+            <div id="variantsList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            <div id="modalExp" style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;"></div>
+            <button style="background:var(--primary);color:#fff;border:none;padding:10px;border-radius:10px;font-weight:700;cursor:pointer;" onclick="closeVariantsModal()">Понятно, пробую снова</button>
+        </div>
+    </div>
+
+    <script>
+        // 10 COMPLETE REAL-WORLD CHAT SCENARIOS
+        const SCENARIOS = [
+            {
+                id: 0,
+                title: "1. 🏠 Аренда квартиры",
+                desc: "Лендлорд: депозит, счетчики и дата заезда",
+                avatar: "🏠",
+                name: "Mr. Henderson (Landlord)",
+                steps: [
+                    {
+                        incoming: "Hello! Thanks for your interest in the 2-bedroom apartment. Are you planning to move in alone or with family?",
+                        taskRu: "Я планирую въехать со своей девушкой в начале следующего месяца.",
+                        hintSkeleton: "I am planning to move in with my girlfriend at the beginning of next month.",
+                        variants: [
+                            "I am planning to move in with my girlfriend at the beginning of next month.",
+                            "I plan to move in with my girlfriend early next month.",
+                            "I am going to move in with my girlfriend at the start of next month."
+                        ],
+                        exp: "Планы через plan to / planning to + предлоги at the beginning of."
+                    },
+                    {
+                        incoming: "Great. The rent is $1,800 plus utilities. We also require a one-month security deposit upfront.",
+                        taskRu: "Коммунальные услуги включены в стоимость или оплачиваются отдельно?",
+                        hintSkeleton: "Are utilities included in the rent or paid separately?",
+                        variants: [
+                            "Are utilities included in the rent or paid separately?",
+                            "Are the utilities included in the price or paid separately?",
+                            "Are utilities included or do we pay them separately?"
+                        ],
+                        exp: "Пассивный вопрос: Are utilities included... or paid separately?"
+                    },
+                    {
+                        incoming: "They are paid separately based on meters. When would you be available for a viewing?",
+                        taskRu: "Мне было бы удобно в пятницу после 6 вечера, если вам подходит.",
+                        hintSkeleton: "Friday after 6 pm would be convenient for me if that works for you.",
+                        variants: [
+                            "Friday after 6 pm would be convenient for me if that works for you.",
+                            "Friday after six pm would suit me if that is fine with you.",
+                            "It would be convenient for me on Friday after 6 pm if that works."
+                        ],
+                        exp: "Вежливое would be convenient + идиома if that works for you."
+                    }
+                ]
+            },
+            {
+                id: 1,
+                title: "2. 📱 Покупка с рук (Marketplace)",
+                desc: "Торг за ноутбук, состояние батареи и встреча",
+                avatar: "📱",
+                name: "David (Seller)",
+                steps: [
+                    {
+                        incoming: "Hi! Yes, the MacBook Pro 16 is still available. It is in mint condition with the original box.",
+                        taskRu: "Сколько циклов батареи у ноутбука и есть ли царапины на экране?",
+                        hintSkeleton: "How many battery cycles does it have and are there any scratches on the screen?",
+                        variants: [
+                            "How many battery cycles does it have and are there any scratches on the screen?",
+                            "How many battery cycles does the laptop have and is the screen scratched?",
+                            "What is the battery cycle count and are there scratches on the screen?"
+                        ],
+                        exp: "Вопрос с how many + конструкция are there any scratches."
+                    },
+                    {
+                        incoming: "Battery cycle count is only 45, and the screen is flawless. My asking price is $1,400 firm.",
+                        taskRu: "Если я заберу его сегодня за наличные, уступите за $1,250?",
+                        hintSkeleton: "If I pick it up today with cash, would you let it go for 1250?",
+                        variants: [
+                            "If I pick it up today with cash would you let it go for 1250?",
+                            "If I take it today for cash would you take 1250?",
+                            "Would you accept 1250 if I pick it up today with cash?"
+                        ],
+                        exp: "Фразовый глагол pick up (забрать) + торг: let it go for."
+                    },
+                    {
+                        incoming: "Meet me in the middle at $1,300 and we have a deal. Can you meet in a public place?",
+                        taskRu: "Договорились. Давайте встретимся в кофейне у центрального метро через час.",
+                        hintSkeleton: "Deal. Let's meet at the coffee shop near the central subway in an hour.",
+                        variants: [
+                            "Deal. Let us meet at the coffee shop near the central subway in an hour.",
+                            "Deal! Let's meet at the coffee shop by the central metro in an hour.",
+                            "It is a deal. Let us meet at the cafe near the central station in an hour."
+                        ],
+                        exp: "Deal! + предлог времени in an hour (через час)."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "3. 🔧 Срочный вызов сантехника",
+                desc: "Прорыв трубы под раковиной и цена вызова",
+                avatar: "🔧",
+                name: "Mike (Emergency Plumber)",
+                steps: [
+                    {
+                        incoming: "Emergency Plumbing Services, Mike speaking. What seems to be the problem?",
+                        taskRu: "У меня прорвало трубу под раковиной на кухне, вода заливает пол.",
+                        hintSkeleton: "A pipe burst under my kitchen sink and water is flooding the floor.",
+                        variants: [
+                            "A pipe burst under my kitchen sink and water is flooding the floor.",
+                            "I have a burst pipe under the kitchen sink and water is leaking everywhere.",
+                            "A pipe has burst under the sink in the kitchen and it is flooding the floor."
+                        ],
+                        exp: "Burst (2-я форма не меняется: burst-burst-burst) + flooding the floor."
+                    },
+                    {
+                        incoming: "First, shut off the main water valve immediately! Have you done that yet?",
+                        taskRu: "Да, я только что перекрыл главный вентиль. Как скоро вы сможете приехать?",
+                        hintSkeleton: "Yes I have just shut off the main valve. How soon can you arrive?",
+                        variants: [
+                            "Yes I have just shut off the main valve. How soon can you arrive?",
+                            "Yes, I just turned off the main valve. How quickly can you get here?",
+                            "Yes I just shut the main valve. How soon can you come?"
+                        ],
+                        exp: "Present Perfect с just + вопрос How soon can you arrive?"
+                    },
+                    {
+                        incoming: "I am on a job nearby, I can be at your place in 25 minutes. Emergency fee is $80 plus parts.",
+                        taskRu: "Хорошо, пожалуйста, приезжайте как можно скорее. Адрес: Бейкер-стрит 14.",
+                        hintSkeleton: "Fine, please come as soon as possible. The address is 14 Baker Street.",
+                        variants: [
+                            "Fine, please come as soon as possible. The address is 14 Baker Street.",
+                            "Okay, please arrive as quickly as possible. The address is 14 Baker Street.",
+                            "Alright, please come as soon as you can. My address is 14 Baker Street."
+                        ],
+                        exp: "Устойчивая связка as soon as possible (как можно скорее)."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "4. 🏨 Ресепшн отеля / Шум",
+                desc: "Шумные соседи в 305 номере и переселение",
+                avatar: "🏨",
+                name: "Emma (Front Desk)",
+                steps: [
+                    {
+                        incoming: "Front desk, Emma speaking. How may I assist you tonight, sir?",
+                        taskRu: "В соседнем номере 305 играет громкая музыка уже два часа, я не могу уснуть.",
+                        hintSkeleton: "Room 305 next door has been playing loud music for two hours and I cannot sleep.",
+                        variants: [
+                            "Room 305 next door has been playing loud music for two hours and I cannot sleep.",
+                            "There is loud music playing in room 305 next door and I can't sleep.",
+                            "The neighbors in room 305 have been playing loud music for two hours and I cannot sleep."
+                        ],
+                        exp: "Present Perfect Continuous (has been playing) для длящегося шума."
+                    },
+                    {
+                        incoming: "I am terribly sorry about that. I will send security up right away to ask them to keep it down.",
+                        taskRu: "Если они не прекратят, могу ли я переселиться в другой тихий номер?",
+                        hintSkeleton: "If they do not stop, would it be possible to move to another quiet room?",
+                        variants: [
+                            "If they do not stop, would it be possible to move to another quiet room?",
+                            "If they don't stop, can I be moved to another quiet room?",
+                            "If they do not stop, could I change to another quiet room?"
+                        ],
+                        exp: "Вежливая конструкция: Would it be possible to move..."
+                    },
+                    {
+                        incoming: "Certainly. If the noise persists, I already have keys prepared for an upgrade on the 5th floor.",
+                        taskRu: "Большое спасибо за понимание и быструю помощь.",
+                        hintSkeleton: "Thank you very much for your understanding and quick help.",
+                        variants: [
+                            "Thank you very much for your understanding and quick help.",
+                            "Thank you so much for understanding and your prompt assistance.",
+                            "Thanks a lot for your understanding and fast response."
+                        ],
+                        exp: "Thank you for your understanding (этикетная норма носителей)."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "5. 🛍️ Возврат товара в магазине",
+                desc: "Бракованный свитер и потерянный чек",
+                avatar: "🛍️",
+                name: "Chloe (Customer Service)",
+                steps: [
+                    {
+                        incoming: "Hello! How can I help you at Customer Service today?",
+                        taskRu: "Я хотел бы вернуть этот свитер, потому что он разошелся по шву после первой стирки.",
+                        hintSkeleton: "I would like to return this sweater because the seam came apart after the first wash.",
+                        variants: [
+                            "I would like to return this sweater because the seam came apart after the first wash.",
+                            "I'd like to return this sweater because it ripped along the seam after the first wash.",
+                            "I want to return this sweater because the seam unraveled after the first wash."
+                        ],
+                        exp: "I would like to return + фразовый глагол come apart (разойтись)."
+                    },
+                    {
+                        incoming: "I see the defect, I apologize. Do you happen to have the original receipt with you?",
+                        taskRu: "К сожалению, я потерял чек, но я оплачивал банковской картой.",
+                        hintSkeleton: "Unfortunately I lost the receipt, but I paid with a credit card.",
+                        variants: [
+                            "Unfortunately I lost the receipt, but I paid with a credit card.",
+                            "Sadly I lost the paper receipt, but I paid by bank card.",
+                            "Unfortunately I have lost the receipt, but I paid by card."
+                        ],
+                        exp: "Paid with a credit card / paid by card."
+                    },
+                    {
+                        incoming: "No problem, we can track the transaction on our system. Would you prefer a replacement or store credit?",
+                        taskRu: "Я предпочел бы полный возврат денег на мою карту, если это возможно.",
+                        hintSkeleton: "I would prefer a full refund to my card if that is possible.",
+                        variants: [
+                            "I would prefer a full refund to my card if that is possible.",
+                            "I'd prefer a full refund to my card if possible.",
+                            "I would rather get a full refund to my card if possible."
+                        ],
+                        exp: "Full refund = полный возврат денежных средств."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "6. 🚗 Прокат авто и страховка",
+                desc: "Царапина на бампере, полная страховка, бензин",
+                avatar: "🚗",
+                name: "Kevin (Car Rental)",
+                steps: [
+                    {
+                        incoming: "Here are the keys to the sedan. Before you drive off, please inspect the exterior for any pre-existing damage.",
+                        taskRu: "Я заметил глубокую царапину на заднем бампере, которой нет в бланке осмотра.",
+                        hintSkeleton: "I noticed a deep scratch on the rear bumper that is not on the inspection sheet.",
+                        variants: [
+                            "I noticed a deep scratch on the rear bumper that is not on the inspection sheet.",
+                            "I noticed a deep scratch on the back bumper which isn't on the form.",
+                            "I found a deep scratch on the rear bumper that isn't listed on the inspection sheet."
+                        ],
+                        exp: "Rear bumper (задний бампер) + inspection sheet (бланк осмотра)."
+                    },
+                    {
+                        incoming: "Good catch! Let me mark that down and initial it right now. Did you opt for full coverage insurance?",
+                        taskRu: "Покрывает ли эта страховка повреждение лобового стекла и прокол шин?",
+                        hintSkeleton: "Does this insurance cover windshield damage and flat tires?",
+                        variants: [
+                            "Does this insurance cover windshield damage and flat tires?",
+                            "Does full coverage include windshield damage and flat tires?",
+                            "Does the insurance policy cover damaged windshields and flat tires?"
+                        ],
+                        exp: "Windshield damage (лобовое стекло) + flat tires (спущенные шины)."
+                    },
+                    {
+                        incoming: "Yes, full coverage brings your deductible down to zero dollars, so you are fully protected.",
+                        taskRu: "Отлично. Должен ли я вернуть автомобиль с полным баком бензина?",
+                        hintSkeleton: "Great. Do I need to return the car with a full tank of gas?",
+                        variants: [
+                            "Great. Do I need to return the car with a full tank of gas?",
+                            "Awesome. Am I supposed to return the car with a full tank?",
+                            "Great! Should I return the vehicle with a full tank of fuel?"
+                        ],
+                        exp: "Full tank of gas (полный бак бензина)."
+                    }
+                ]
+            },
+            {
+                id: 6,
+                title: "7. 💳 Банк / Заблокированная карта",
+                desc: "Звонок в поддержку из-за границы, снятие блока",
+                avatar: "💳",
+                name: "Sarah (Fraud Prevention)",
+                steps: [
+                    {
+                        incoming: "Global Bank Fraud Prevention, Sarah speaking. I see your debit card was temporarily locked due to suspicious activity.",
+                        taskRu: "Я сейчас нахожусь в отпуске за границей и пытался оплатить отель.",
+                        hintSkeleton: "I am currently on vacation abroad and I was trying to pay for a hotel.",
+                        variants: [
+                            "I am currently on vacation abroad and I was trying to pay for a hotel.",
+                            "I'm currently on holiday abroad and I tried to pay for a hotel.",
+                            "I am on vacation overseas right now and tried to pay for a hotel."
+                        ],
+                        exp: "On vacation abroad (в отпуске за границей)."
+                    },
+                    {
+                        incoming: "That explains the foreign charge. To verify your identity, could you confirm your date of birth and billing address?",
+                        taskRu: "14 мая 1992 года, улица Гринвич, дом 25, квартира 4.",
+                        hintSkeleton: "May 14th 1992, 25 Greenwich Street, apartment 4.",
+                        variants: [
+                            "May 14th 1992, 25 Greenwich Street, apartment 4.",
+                            "May 14 1992, 25 Greenwich Street, flat 4.",
+                            "May fourteenth 1992, 25 Greenwich Street, apartment 4."
+                        ],
+                        exp: "Порядок адреса в англ: номер дома + улица + номер квартиры."
+                    },
+                    {
+                        incoming: "Identity verified! I have removed the block. Could you try making the payment again in about two minutes?",
+                        taskRu: "Спасибо огромное. Можете также поставить отметку о путешествии на две недели?",
+                        hintSkeleton: "Thank you very much. Could you also put a travel notice on my account for two weeks?",
+                        variants: [
+                            "Thank you very much. Could you also put a travel notice on my account for two weeks?",
+                            "Thanks so much. Can you also set a travel alert for two weeks?",
+                            "Thank you! Could you please place a travel notice on the card for two weeks?"
+                        ],
+                        exp: "Travel notice / travel alert = банковская отметка о выезде."
+                    }
+                ]
+            },
+            {
+                id: 7,
+                title: "8. 🍽️ Ресторан / Аллергия и счет",
+                desc: "Аллергия на орехи, замена соуса, ошибка в счете",
+                avatar: "🍽️",
+                name: "Marco (Waiter)",
+                steps: [
+                    {
+                        incoming: "Good evening! Welcome to Bella Vista. Are you ready to order or would you like a few more minutes?",
+                        taskRu: "У меня сильная аллергия на орехи. Содержит ли этот соус арахисовое масло?",
+                        hintSkeleton: "I have a severe nut allergy. Does this sauce contain peanut oil?",
+                        variants: [
+                            "I have a severe nut allergy. Does this sauce contain peanut oil?",
+                            "I am allergic to nuts. Does this sauce contain any peanut oil?",
+                            "I have a severe allergy to nuts. Is there peanut oil in this sauce?"
+                        ],
+                        exp: "Severe allergy (острая аллергия) + contain peanut oil."
+                    },
+                    {
+                        incoming: "I am very glad you told me. Yes, the chef uses peanut oil in that dressing. I can have it made with olive oil instead.",
+                        taskRu: "Это было бы замечательно. И принесите, пожалуйста, стакан воды со льдом.",
+                        hintSkeleton: "That would be wonderful. And please bring a glass of water with ice.",
+                        variants: [
+                            "That would be wonderful. And please bring a glass of water with ice.",
+                            "That would be great. And could you bring a glass of iced water please?",
+                            "That would be fantastic. Please bring a glass of ice water as well."
+                        ],
+                        exp: "That would be wonderful + glass of water with ice."
+                    },
+                    {
+                        incoming: "Right away! And here is your bill at the end of the meal. Whenever you are ready.",
+                        taskRu: "Кажется, в счете ошибка: нам посчитали десерт, который мы не заказывали.",
+                        hintSkeleton: "There seems to be a mistake on the bill: we were charged for a dessert we didn't order.",
+                        variants: [
+                            "There seems to be a mistake on the bill: we were charged for a dessert we didn't order.",
+                            "I think there is an error on the bill: you included a dessert we did not order.",
+                            "There seems to be an oversight on the bill: we were charged for a dessert we never ordered."
+                        ],
+                        exp: "Вежливое There seems to be an error + we were charged for."
+                    }
+                ]
+            },
+            {
+                id: 8,
+                title: "9. 🏥 Визит к врачу / Аптека",
+                desc: "Симптомы, температура, рецепт на антибиотики",
+                avatar: "🏥",
+                name: "Dr. Taylor (Physician)",
+                steps: [
+                    {
+                        incoming: "Good afternoon. What symptoms are you experiencing today?",
+                        taskRu: "У меня болит горло и держится высокая температура уже три дня.",
+                        hintSkeleton: "I have a sore throat and a high fever that has lasted for three days.",
+                        variants: [
+                            "I have a sore throat and a high fever that has lasted for three days.",
+                            "I have had a sore throat and a high fever for three days.",
+                            "I have a painful throat and a high temperature for three days now."
+                        ],
+                        exp: "Sore throat (больное горло) + high fever (жар/температура)."
+                    },
+                    {
+                        incoming: "Let me check your throat... Yes, there is significant inflammation. Are you currently taking any medication?",
+                        taskRu: "Я принимал только парацетамол, но он почти не сбивает температуру.",
+                        hintSkeleton: "I have only been taking paracetamol, but it hardly brings the fever down.",
+                        variants: [
+                            "I have only been taking paracetamol, but it hardly brings the fever down.",
+                            "I only took paracetamol, but it barely reduces the fever.",
+                            "I've only taken paracetamol, but it hardly lowers the temperature."
+                        ],
+                        exp: "Hardly brings down = с трудом / едва сбивает."
+                    },
+                    {
+                        incoming: "This looks like a bacterial infection. I am writing you a prescription for antibiotics. Take one tablet twice a day with meals.",
+                        taskRu: "Нужен ли мне повторный визит, если симптомы не пройдут через пять дней?",
+                        hintSkeleton: "Do I need a follow-up visit if the symptoms do not go away in five days?",
+                        variants: [
+                            "Do I need a follow-up visit if the symptoms do not go away in five days?",
+                            "Should I schedule a follow-up visit if symptoms don't disappear in five days?",
+                            "Do I need to come back if the symptoms persist after five days?"
+                        ],
+                        exp: "Follow-up visit = повторный визит к врачу."
+                    }
+                ]
+            },
+            {
+                id: 9,
+                title: "10. ✈️ Потерянный багаж в аэропорту",
+                desc: "Чемодан улетел не туда, доставка в отель",
+                avatar: "✈️",
+                name: "Brian (Lost & Found)",
+                steps: [
+                    {
+                        incoming: "Lost and Baggage Inquiries, Brian speaking. Did your luggage fail to appear on the carousel?",
+                        taskRu: "Да, все пассажиры с рейса из Нью-Йорка уже забрали чемоданы, а моего нет.",
+                        hintSkeleton: "Yes, all passengers from the New York flight have claimed their bags, but mine is missing.",
+                        variants: [
+                            "Yes, all passengers from the New York flight have claimed their bags, but mine is missing.",
+                            "Yes, everyone from the New York flight got their luggage, but mine didn't arrive.",
+                            "Yes, all passengers from the flight from New York picked up their bags, but mine isn't there."
+                        ],
+                        exp: "Mine is missing = мой отсутствует / потерян."
+                    },
+                    {
+                        incoming: "I apologize for the inconvenience. May I see your baggage claim tag and passport, please?",
+                        taskRu: "Вот мой посадочный талон и багажная бирка. Чемодан большой, темно-синий.",
+                        hintSkeleton: "Here is my boarding pass and luggage tag. The suitcase is large and dark blue.",
+                        variants: [
+                            "Here is my boarding pass and luggage tag. The suitcase is large and dark blue.",
+                            "Here are my boarding pass and baggage tag. It is a large dark blue suitcase.",
+                            "Here is my boarding pass and tag. The bag is big and navy blue."
+                        ],
+                        exp: "Boarding pass (посадочный) + luggage tag (багажная бирка)."
+                    },
+                    {
+                        incoming: "Thank you. Our system shows it was mistakenly routed through Frankfurt. It will arrive on tonight's flight.",
+                        taskRu: "Сможете ли вы бесплатно доставить его прямо в мой отель завтра утром?",
+                        hintSkeleton: "Will you be able to deliver it free of charge directly to my hotel tomorrow morning?",
+                        variants: [
+                            "Will you be able to deliver it free of charge directly to my hotel tomorrow morning?",
+                            "Can you deliver it to my hotel tomorrow morning free of charge?",
+                            "Will you deliver it directly to my hotel tomorrow morning at no extra cost?"
+                        ],
+                        exp: "Free of charge / at no extra cost = бесплатно."
+                    }
+                ]
+            }
+        ];
+
+        // 20 ADDITIONAL REAL-WORLD CHAT SCENARIOS (11 - 30)
+        const EXTRA_SCENARIOS_20 = [
+            { id: 10, avatar: '🏋️', title: '11. 🏋️ Фитнес-клуб и абонемент', desc: 'Заморозка карты на время командировки', name: 'Marcus (Gym Manager)', steps: [
+                { incoming: 'Hi! Welcome back to Metro Fitness. How can I help you with your membership today?', taskRu: 'Я уезжаю в командировку на три недели и хотел бы временно заморозить абонемент.', hintSkeleton: 'I am going on a business trip for three weeks and I would like to freeze my membership.', variants: ['I am going on a business trip for three weeks and I would like to freeze my membership.', 'I\'m going on a business trip for three weeks and I\'d like to freeze my membership.', 'I am leaving on a business trip for three weeks and want to freeze my membership.'], exp: 'Go on a business trip + would like to freeze.' },
+                { incoming: 'Your annual plan includes 30 days of complimentary freeze. What date should we set as the start date?', taskRu: 'Пожалуйста, начните заморозку со следующего понедельника, с 15-го числа.', hintSkeleton: 'Please start the freeze next Monday, from the 15th.', variants: ['Please start the freeze next Monday from the 15th.', 'Please start the freeze from next Monday the 15th.', 'Could you start the freeze next Monday from the fifteenth?'], exp: 'Next Monday + from the 15th.' },
+            ]},
+            { id: 11, avatar: '💼', title: '12. 💼 Собеседование (HR)', desc: 'Зарплатные ожидания и дата выхода на работу', name: 'Rachel (Talent Lead)', steps: [
+                { incoming: 'The team really enjoyed speaking with you! What are your compensation expectations for this position?', taskRu: 'Основываясь на моих навыках и требованиях роли, я рассчитываю на $90,000 в год.', hintSkeleton: 'Based on my skills and the role requirements, I am expecting 90000 a year.', variants: ['Based on my skills and the role requirements, I am expecting 90000 a year.', 'Based on my experience and the job requirements, I am looking for 90000 per year.', 'Given my skills and the requirements, I expect around 90000 a year.'], exp: 'Based on my skills + expect / look for + per year.' },
+                { incoming: 'That is definitely within our budget range. If we extend an offer by Friday, when could you realistically start?', taskRu: 'Мне нужно отработать две недели на текущей работе, так что я смогу начать через месяц.', hintSkeleton: 'I need to give two weeks notice at my current job so I can start in a month.', variants: ['I need to give two weeks notice at my current job so I can start in a month.', 'I have to give two weeks\' notice at my current job, so I can start in a month.', 'I need to give two weeks notice at my current job, so I\'ll be able to start in a month.'], exp: 'Give two weeks\' notice = предупредить об уходе за 2 недели.' },
+            ]},
+            { id: 12, avatar: '🌐', title: '13. 🌐 Интернет-провайдер', desc: 'Пропал интернет перед важным созвоном', name: 'Liam (Technical Support)', steps: [
+                { incoming: 'Spectrum Fiber Support, Liam speaking. Could you describe the issue with your connection?', taskRu: 'Красная лампочка горит на моем роутере, и у меня нет интернета уже час.', hintSkeleton: 'The red light is blinking on my router and I have had no internet for an hour.', variants: ['The red light is on my router and I have had no internet for an hour.', 'There is a red light on my router and my internet has been down for an hour.', 'The red light is blinking on my router and I have had no connection for an hour.'], exp: 'Has been down / have had no internet for an hour.' },
+                { incoming: 'I am checking the line... It looks like an outage in your area. Our engineers are already working on it.', taskRu: 'У меня важная онлайн-конференция через тридцать минут. Есть ли примерное время восстановления?', hintSkeleton: 'I have an important conference call in thirty minutes. Is there an estimated restoration time?', variants: ['I have an important video call in thirty minutes. Is there an estimated time of resolution?', 'I have an important online meeting in thirty minutes. Is there an estimated restoration time?', 'I have a crucial conference call in 30 minutes. When will it be restored?'], exp: 'Estimated restoration time = расчетное время починки.' },
+            ]},
+            { id: 13, avatar: '🚕', title: '14. 🚕 Такси и водитель', desc: 'Не та точка посадки и просьба подоехать', name: 'Tariq (Uber Driver)', steps: [
+                { incoming: 'Hi! I am in the silver Camry outside the main shopping mall entrance, but I do not see you.', taskRu: 'Я стою у северного выхода возле аптеки. Можете подъехать сюда?', hintSkeleton: 'I am standing by the north exit near the pharmacy. Can you drive around here?', variants: ['I am standing by the north exit near the pharmacy. Can you drive around here?', 'I am at the north exit next to the pharmacy. Could you pull up here?', 'I\'m waiting by the north entrance near the pharmacy. Can you come around here?'], exp: 'Pull up / drive around here = подъехать сюда.' },
+                { incoming: 'Got it! There is a little bit of traffic around the corner, I will be right there in two minutes.', taskRu: 'Хорошо, без проблем, я в черном пальто и держу серый зонт.', hintSkeleton: 'No problem, I am wearing a black coat and holding a grey umbrella.', variants: ['No problem I am wearing a black coat and holding a grey umbrella.', 'Great, no rush! I am wearing a black coat and holding a gray umbrella.', 'Okay, I am in a black coat holding a grey umbrella.'], exp: 'Wearing a coat and holding an umbrella.' },
+            ]},
+            { id: 14, avatar: '☕', title: '15. ☕ Заказ в кофейне', desc: 'Овсяное молоко, температура и сироп без сахара', name: 'Hannah (Barista)', steps: [
+                { incoming: 'Good morning! What can I get started for you today?', taskRu: 'Можно мне большой латте на овсяном молоке с одним шотом эспрессо?', hintSkeleton: 'Can I get a large latte with oat milk and a single shot of espresso?', variants: ['Can I get a large latte with oat milk and a single shot of espresso?', 'Could I have a large oat milk latte with a single espresso shot?', 'I would like a large latte made with oat milk and one shot of espresso please.'], exp: 'Can I get / Could I have + with oat milk.' },
+                { incoming: 'Sure! Would you like any flavors, and do you prefer it extra hot or regular temp?', taskRu: 'Пожалуйста, сделайте обычной температуры и добавьте ванильный сироп без сахара.', hintSkeleton: 'Regular temperature please, and could you add sugar-free vanilla syrup?', variants: ['Regular temperature please, and add sugar-free vanilla syrup.', 'Regular temp please, and could you add sugar-free vanilla syrup?', 'Regular temperature please, with sugar-free vanilla syrup.'], exp: 'Sugar-free syrup = сироп без сахара.' },
+            ]},
+            { id: 15, avatar: '👔', title: '16. 👔 Претензия в химчистке', desc: 'Пятно не исчезло после стирки пиджака', name: 'Elena (Dry Cleaners)', steps: [
+                { incoming: 'Here is your wool blazer, all wrapped and ready. That will be $24, please.', taskRu: 'Минутку, масляное пятно на правом рукаве все еще здесь.', hintSkeleton: 'Wait a minute, the oil stain on the right sleeve is still here.', variants: ['Wait a minute, the oil stain on the right sleeve is still here.', 'Hold on, the grease stain on the right sleeve has not come out.', 'Just a moment, the oil stain on the right sleeve is still visible.'], exp: 'Oil stain / grease stain + has not come out.' },
+                { incoming: 'Oh, let me see... It appears our standard cycle didn\'t lift it. I sincerely apologize.', taskRu: 'Можете ли вы почистить его повторно бесплатно с более сильным средством?', hintSkeleton: 'Could you clean it again free of charge with a stronger solvent?', variants: ['Could you re-clean it free of charge using a stronger stain remover?', 'Could you clean it again free of charge with a stronger product?', 'Can you run it through again at no extra charge with a stronger treatment?'], exp: 'Free of charge / at no extra charge = бесплатно.' },
+            ]},
+            { id: 16, avatar: '📦', title: '17. 📦 Доставка посылки', desc: 'Смена адреса и доставка до двери', name: 'Carlos (Courier)', steps: [
+                { incoming: 'Hi, I have a package from Amazon for you, but nobody is answering the buzzer at building 12.', taskRu: 'Я сейчас на работе. Можете ли вы оставить посылку у двери соседа в квартире 4?', hintSkeleton: 'I am at work right now. Could you leave the package by the door of apartment 4?', variants: ['I am at work right now. Could you leave the package at my neighbor\'s door in apartment 4?', 'I\'m at work right now. Can you leave the package by the door of flat 4?', 'I am currently at work. Could you please leave it outside apartment 4?'], exp: 'Leave the package by the door = оставить у двери.' },
+                { incoming: 'Company policy requires a signature for this item. Would tomorrow morning work better?', taskRu: 'Да, пожалуйста, доставьте завтра после 10 утра, я буду дома весь день.', hintSkeleton: 'Yes, please deliver it tomorrow after 10 am, I will be home all day.', variants: ['Yes please deliver it tomorrow after 10 am, I will be home all day.', 'Yes, please attempt delivery tomorrow after ten am, I\'ll be home all day.', 'That works. Please bring it tomorrow after 10 am, I will be home.'], exp: 'Deliver tomorrow after 10 am + will be home.' },
+            ]},
+            { id: 17, avatar: '🐶', title: '18. 🐶 Прием в ветклинике', desc: 'Собака проглотила кость и стала вялой', name: 'Dr. Bell (Veterinarian)', steps: [
+                { incoming: 'Animal Care Emergency. What brings your pet in this afternoon?', taskRu: 'Моя собака проглотила куриную кость вчера и сегодня отказывается от еды.', hintSkeleton: 'My dog swallowed a chicken bone yesterday and is refusing to eat today.', variants: ['My dog swallowed a chicken bone yesterday and is refusing to eat today.', 'My dog swallowed a chicken bone yesterday and has refused to eat all day.', 'My dog swallowed a bone yesterday and won\'t eat anything today.'], exp: 'Swallowed a bone + is refusing to eat.' },
+                { incoming: 'Chicken bones can splinter and cause an obstruction. We need to take an immediate X-ray.', taskRu: 'Сколько займет рентген и опасна ли эта процедура?', hintSkeleton: 'How long will the X-ray take and is the procedure dangerous?', variants: ['How long will the X-ray take and is the procedure dangerous?', 'How long does the X-ray take and is it dangerous for the dog?', 'How long will the X-ray take and are there any risks?'], exp: 'How long will it take + is it dangerous.' },
+            ]},
+            { id: 18, avatar: '🏢', title: '19. 🏢 Аренда коворкинга', desc: 'Бронь переговорной комнаты с монитором', name: 'Sophie (Community Manager)', steps: [
+                { incoming: 'Hi there! Looking to book one of our meeting rooms for your team today?', taskRu: 'Мне нужна переговорка на четырех человек с двух до четырех часов дня.', hintSkeleton: 'I need a meeting room for four people from two to four pm.', variants: ['I need a meeting room for four people from two to four pm.', 'I\'d like to book a meeting room for four people from 2 to 4 pm.', 'We need a conference room for four people between two and four pm.'], exp: 'Meeting room for four people from 2 to 4 pm.' },
+                { incoming: 'Room B is open during that slot. It comes equipped with a 4K display and high-speed Wi-Fi.', taskRu: 'Включены ли кофе и вода для моих гостей в стоимость аренды?', hintSkeleton: 'Are coffee and water for my guests included in the rental price?', variants: ['Are coffee and water for my guests included in the rental price?', 'Is complimentary coffee and water for my guests included?', 'Are coffee and drinking water included in the price for my guests?'], exp: 'Included in the rental price = включено в стоимость.' },
+            ]},
+            { id: 19, avatar: '🚪', title: '20. 🚪 Разговор с соседом', desc: 'Просьба не сверлить стены в воскресенье', name: 'Greg (Neighbor from Apt 18)', steps: [
+                { incoming: 'Hey, sorry about the noise! We are remodeling the bathroom tiles this weekend.', taskRu: 'Я понимаю, но сегодня воскресенье, и шум дрели не прекращается с 8 утра.', hintSkeleton: 'I understand, but today is Sunday and the drilling noise has been non-stop since 8 am.', variants: ['I understand, but today is Sunday and the drilling has not stopped since 8 am.', 'I understand, but it\'s Sunday and the drilling noise has been going on since 8 am.', 'I get it, but today is Sunday and the drilling noise has been non-stop since eight am.'], exp: 'Drilling noise + has been going on since 8 am.' },
+                { incoming: 'Oh man, I lost track of time. I really apologize. Would it help if we stopped by 2 pm?', taskRu: 'Было бы здорово, если бы вы закончили шумные работы к часу дня.', hintSkeleton: 'It would be great if you could finish the noisy work by one pm.', variants: ['It would be great if you could finish the noisy work by 1 pm.', 'It would be wonderful if you wrapped up the loud work by one pm.', 'That would help, but could you finish the noisy work by 1 pm?'], exp: 'It would be great if you could... by 1 pm.' },
+            ]},
+            { id: 20, avatar: '💈', title: '21. 💈 Визит в барбершоп', desc: 'Короткие виски и сохранить длину сверху', name: 'Sam (Barber)', steps: [
+                { incoming: 'Take a seat! How are we styling your hair today?', taskRu: 'Сделайте коротко по бокам с плавным переходом, но оставьте длину сверху.', hintSkeleton: 'Keep it short on the sides with a fade, but leave the length on top.', variants: ['Keep it short on the sides with a fade, but leave the length on top.', 'I want it short on the sides with a taper fade, but keep the length on top.', 'Short on the sides with a fade please, but don\'t cut too much off the top.'], exp: 'Fade (плавный переход) + leave the length on top.' },
+                { incoming: 'Understood! Would you like me to trim and line up your beard as well?', taskRu: 'Да, пожалуйста, подравняйте бороду и сделайте четкие контуры на щеках.', hintSkeleton: 'Yes please, trim the beard and line up the edges on my cheeks.', variants: ['Yes please, trim the beard and line up the edges on my cheeks.', 'Yes please, trim my beard and give me sharp lines on the cheeks.', 'Yes please, clean up the beard and sharpen the cheek lines.'], exp: 'Line up the edges = сделать четкие контуры.' },
+            ]},
+            { id: 21, avatar: '🛫', title: '22. 🛫 Авиакомпания и стыковка', desc: 'Опоздание на пересадку из-за задержки первого рейса', name: 'Jessica (Delta Airlines)', steps: [
+                { incoming: 'Customer Service, Jessica here. I see your flight from Chicago was delayed by two hours.', taskRu: 'Из-за этой задержки я пропустил свой стыковочный рейс в Лондон.', hintSkeleton: 'Due to this delay, I missed my connecting flight to London.', variants: ['Due to this delay I missed my connecting flight to London.', 'Because of this delay, I have missed my connecting flight to London.', 'Owing to this delay, I missed my connection to London.'], exp: 'Connecting flight = стыковочный рейс.' },
+                { incoming: 'I am so sorry. We can rebook you on British Airways at 8 pm, or put you in a hotel until tomorrow.', taskRu: 'Перебронируйте меня на рейс в 8 вечера, пожалуйста, и предоставьте ваучер на еду.', hintSkeleton: 'Please rebook me on the 8 pm flight and provide a meal voucher.', variants: ['Please rebook me on the 8 pm flight and provide a meal voucher.', 'Could you rebook me on the eight pm flight and give me a meal voucher?', 'I prefer the 8 pm flight, and could you please issue a meal voucher?'], exp: 'Meal voucher = талон на питание в аэропорту.' },
+            ]},
+            { id: 22, avatar: '🦷', title: '23. 🦷 Стоматология / Острая боль', desc: 'Выпала пломба и зуб реагирует на холодное', name: 'Clara (Dental Reception)', steps: [
+                { incoming: 'Bright Smile Dental, how can we help with your tooth today?', taskRu: 'У меня вчера выпала пломба, и теперь зуб сильно болит от холодного.', hintSkeleton: 'My filling fell out yesterday and now the tooth is very sensitive to cold.', variants: ['My filling fell out yesterday and now the tooth hurts badly from cold drinks.', 'A filling came out yesterday and now the tooth is very sensitive to cold.', 'My filling fell out yesterday and the tooth is throbbing whenever I drink cold water.'], exp: 'Filling fell out (пломба выпала) + sensitive to cold.' },
+                { incoming: 'That sounds painful. We have an emergency slot open with Dr. Adams at 3:30 pm.', taskRu: 'Запишите меня, пожалуйста. Потребуется ли анестезия во время лечения?', hintSkeleton: 'Book me in please. Will anesthesia be required during the treatment?', variants: ['Please book me in. Will anesthesia be required during the treatment?', 'Sign me up please. Will I need a local anesthetic for this procedure?', 'Book that slot for me please. Will local anesthesia be used?'], exp: 'Book me in + local anesthesia.' },
+            ]},
+            { id: 23, avatar: '📚', title: '24. 📚 Книжный магазин', desc: 'Поиск редкого издания книги на складе', name: 'Arthur (Bookseller)', steps: [
+                { incoming: 'Hello! Looking for any specific title or author in our literature section?', taskRu: 'Я ищу английское издание романа Дюна в твердой обложке.', hintSkeleton: 'I am looking for the hardcover English edition of the novel Dune.', variants: ['I am looking for the hardcover English edition of the novel Dune.', 'I\'m searching for a hardcover edition of the novel Dune in English.', 'Do you have the English hardcover edition of Dune in stock?'], exp: 'Hardcover edition (в твердой обложке) vs paperback.' },
+                { incoming: 'It is currently out of stock on our shelves, but our central warehouse has copies.', taskRu: 'Сколько дней займет доставка, если я закажу книгу прямо сейчас?', hintSkeleton: 'How many days will delivery take if I order the book right now?', variants: ['How many days will delivery take if I order the book right now?', 'How long will the delivery take if I place an order right now?', 'How many days will it take to arrive if I order it today?'], exp: 'How long will delivery take if I order...' },
+            ]},
+            { id: 24, avatar: '🎫', title: '25. 🎫 Билеты на концерт', desc: 'Деньги списались, но электронный билет не пришел', name: 'Ticketmaster Support', steps: [
+                { incoming: 'Ticketmaster Customer Care. Please state your order reference or describe your issue.', taskRu: 'Деньги списались с моей карты, но электронные билеты не пришли на мою почту.', hintSkeleton: 'The money was charged to my card, but the e-tickets were not sent to my email.', variants: ['The money was charged to my card, but the e-tickets were not sent to my email.', 'The charge went through on my card, but I haven\'t received the tickets by email.', 'My card was charged, but the electronic tickets never arrived in my inbox.'], exp: 'The charge went through / money was charged.' },
+                { incoming: 'I can search your transaction manually. What email address was used at checkout?', taskRu: 'Я использовал адрес alex.dev@gmail.com примерно час назад.', hintSkeleton: 'I used the email alex.dev@gmail.com approximately an hour ago.', variants: ['I used the email alex.dev@gmail.com approximately an hour ago.', 'I used alex.dev@gmail.com about one hour ago.', 'The email address was alex.dev@gmail.com roughly an hour ago.'], exp: 'Used the email + approximately an hour ago.' },
+            ]},
+            { id: 25, avatar: '👮', title: '26. 👮 Полиция / Утеря вещей', desc: 'Заявление о пропаже рюкзака с документами в парке', name: 'Officer Miller (Police)', steps: [
+                { incoming: 'Central Precinct, Officer Miller. What would you like to report today?', taskRu: 'Я хочу заявить об утере черного кожаного рюкзака с моим паспортом.', hintSkeleton: 'I want to report the loss of a black leather backpack with my passport inside.', variants: ['I want to report the loss of a black leather backpack containing my passport.', 'I would like to report a lost black leather backpack with my passport inside.', 'I need to report a missing black leather backpack that had my passport in it.'], exp: 'Report the loss of / report a missing backpack.' },
+                { incoming: 'Where and at what time did you last have possession of the item?', taskRu: 'Я оставил его на скамейке в Гайд-парке около четырех часов дня.', hintSkeleton: 'I left it on a bench in Hyde Park around four in the afternoon.', variants: ['I left it on a bench in Hyde Park around four in the afternoon.', 'I accidentally left it on a bench in Hyde Park at around 4 pm.', 'It was on a bench in Hyde Park around 4 o\'clock this afternoon.'], exp: 'Left it on a bench around 4 pm.' },
+            ]},
+            { id: 26, avatar: '🛡️', title: '27. 🛡️ Страховая после ДТП', desc: 'Оформление незначительной аварии на парковке', name: 'Brian (Claims Agent)', steps: [
+                { incoming: 'AllState Claims Department. Are all passengers safe, and were police notified?', taskRu: 'Никто не пострадал. Другая машина задела мою фару на парковке.', hintSkeleton: 'Nobody was injured. Another car clipped my headlight in the parking lot.', variants: ['Nobody was injured. Another car scratched my headlight in the parking lot.', 'No one was hurt. Another vehicle hit my headlight in the parking lot.', 'Everyone is fine, no injuries. Another car clipped my headlight in the parking lot.'], exp: 'Nobody was injured / clipped my headlight.' },
+                { incoming: 'Glad everyone is uninjured. Have you exchanged contact and policy numbers with the other driver?', taskRu: 'Да, я сфотографировал его водительские права и повреждения обоих автомобилей.', hintSkeleton: 'Yes, I took photos of his driver\'s license and the damage to both cars.', variants: ['Yes I took photos of his driver\'s license and the damage on both cars.', 'Yes, I photographed his driving license and the damage to both vehicles.', 'Yes I took pictures of his license and the damage to both cars.'], exp: 'Took photos of his driver\'s license.' },
+            ]},
+            { id: 27, avatar: '📲', title: '28. 📲 Ремонт смартфона', desc: 'Замена разбитого экрана без удаления данных', name: 'Leo (iRepair Technician)', steps: [
+                { incoming: 'Hey! Cracked front glass on your iPhone 14 Pro? Let me take a look.', taskRu: 'Сенсор все еще работает, но стекло полностью разбито после падения на асфальт.', hintSkeleton: 'The touch sensor still works, but the glass is completely shattered after dropping on asphalt.', variants: ['The touchscreen still works, but the glass is completely shattered after falling on asphalt.', 'The touch sensor still works, but the screen is shattered from dropping it on asphalt.', 'Touch is working fine, but the glass shattered completely when I dropped it.'], exp: 'Touchscreen still works + completely shattered.' },
+                { incoming: 'We can install an OEM OLED panel in 45 minutes for $180. Any questions before we start?', taskRu: 'Останутся ли все мои личные данные и фотографии нетронутыми при замене экрана?', hintSkeleton: 'Will all my personal data and photos remain intact during the screen replacement?', variants: ['Will all my personal data and photos remain intact during the screen replacement?', 'Will my personal data and photos be safe during the repair?', 'Will all my photos and data stay untouched while you replace the screen?'], exp: 'Remain intact = остаться в целости и сохранности.' },
+            ]},
+            { id: 28, avatar: '🧼', title: '29. 🧼 Детейлинг автомойка', desc: 'Химчистка салона от пролитого кофе и сока', name: 'Dmitri (Auto Spa)', steps: [
+                { incoming: 'Welcome to Sparkle Auto Spa! Are you looking for a basic exterior wash or interior detailing?', taskRu: 'Мне нужна глубокая химчистка задних сидений, так как ребенок пролил вишневый сок.', hintSkeleton: 'I need a deep steam cleaning for the back seats because my kid spilled cherry juice.', variants: ['I need a deep shampoo cleaning for the back seats because my kid spilled cherry juice.', 'I need deep interior detailing for the rear seats because my child spilled cherry juice.', 'I need deep steam cleaning on the back seats as my child spilled cherry juice.'], exp: 'Deep steam/shampoo cleaning + spilled juice.' },
+                { incoming: 'Cherry stains can set fast, but our enzyme extraction will lift them completely. Need leather conditioning too?', taskRu: 'Да, обработайте кожу кондиционером и пропылесосьте багажник, пожалуйста.', hintSkeleton: 'Yes, please condition the leather and vacuum the trunk as well.', variants: ['Yes, please condition the leather and vacuum the trunk as well.', 'Yes please apply leather conditioner and vacuum the boot.', 'Yes, condition the leather seats and vacuum out the trunk please.'], exp: 'Condition the leather + vacuum the trunk.' },
+            ]},
+            { id: 29, avatar: '🎂', title: '30. 🎂 Заказ торта у кондитера', desc: 'Безглютеновый торт на день рождения с надписью', name: 'Claire (Pastry Chef)', steps: [
+                { incoming: 'Sweet Treats Bakery! How many guests are you expecting for the birthday celebration?', taskRu: 'У нас будет около пятнадцати гостей, и торт обязательно должен быть без глютена.', hintSkeleton: 'We will have around fifteen guests, and the cake must be strictly gluten-free.', variants: ['We will have around fifteen guests, and the cake must be strictly gluten-free.', 'We are expecting about 15 guests, and the cake has to be gluten-free.', 'There will be around fifteen guests, and it\'s essential that the cake is gluten-free.'], exp: 'Around 15 guests + strictly gluten-free.' },
+                { incoming: 'We have a certified gluten-free kitchen! What flavor profile and custom message would you like?', taskRu: 'Шоколадный с малиной, и напишите красивым шрифтом \'Happy Birthday Max!\'.', hintSkeleton: 'Chocolate with raspberry, and please write \'Happy Birthday Max!\' in neat lettering.', variants: ['Chocolate with raspberry, and please write Happy Birthday Max in nice handwriting.', 'Chocolate with raspberry, and please write Happy Birthday Max in neat lettering.', 'Chocolate with raspberry flavor, with Happy Birthday Max written on top.'], exp: 'Chocolate with raspberry + in neat lettering.' },
+            ]}
+        ];
+
+        // Merge all 30 scenarios into one array
+        EXTRA_SCENARIOS_20.forEach(sc => SCENARIOS.push(sc));
+
+        // ENGINE STATE
+        let activeScenarioIndex = 0;
+        let currentStepIndex = 0;
+
+        const synth = window.speechSynthesis;
+
+        function speakWord(word, el) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
+            if (el) el.classList.add('speaking');
+            const clean = word.replace(/[^a-zA-Z']/g, '');
+            const u = new SpeechSynthesisUtterance(clean);
+            u.lang = 'en-US';
+            u.rate = 0.85;
+            u.onend = () => { if (el) el.classList.remove('speaking'); };
+            synth.speak(u);
+        }
+
+        function playPhrase(text) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            synth.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'en-US';
+            u.rate = 0.9;
+            synth.speak(u);
+        }
+
+        function normalize(str) {
+            return str.toLowerCase()
+                .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?'"]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function loadScenario(idx) {
+            // Freemium Paywall: Scenarios 0 and 1 are free. Scenarios 2..29 are premium.
+            if (idx >= 2 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(idx, 2)) {
+                    return; // Блокируем загрузку и показываем окно оплаты
+                }
+            }
+
+            activeScenarioIndex = idx;
+            currentStepIndex = 0;
+            const sc = SCENARIOS[idx];
+
+            document.getElementById('contactAvatar').innerText = sc.avatar;
+            document.getElementById('contactName').innerText = sc.name;
+
+            document.getElementById('chatStream').innerHTML = `
+                <div class="typing-indicator" id="typingIndicator">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </div>
+            `;
+
+            closeDrawer();
+            showIncomingStep();
+        }
+
+        function showIncomingStep() {
+            const sc = SCENARIOS[activeScenarioIndex];
+            const stepData = sc.steps[currentStepIndex];
+
+            document.getElementById('progressPill').innerText = `Шаг ${currentStepIndex + 1} из ${sc.steps.length}`;
+            document.getElementById('taskRu').innerText = stepData.taskRu;
+            document.getElementById('skeletonHint').innerText = stepData.hintSkeleton;
+            document.getElementById('skeletonHint').style.display = 'none';
+
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'flex';
+            scrollChat();
+
+            setTimeout(() => {
+                indicator.style.display = 'none';
+                appendIncomingMessage(stepData.incoming);
+                playPhrase(stepData.incoming);
+                scrollChat();
+            }, 1000);
+        }
+
+        function appendIncomingMessage(text) {
+            const stream = document.getElementById('chatStream');
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble msg-incoming';
+            const wordsHtml = text.split(' ').map(w => `<span class="word" onclick="speakWord('${w}', this)">${w}</span>`).join(' ');
+            bubble.innerHTML = `
+                <div class="msg-top-row">
+                    <button class="audio-btn" onclick="playPhrase('${text.replace(/'/g, "\\'")}')">🔊</button>
+                    <div>${wordsHtml}</div>
+                </div>
+            `;
+            const indicator = document.getElementById('typingIndicator');
+            stream.insertBefore(bubble, indicator);
+        }
+
+        function appendOutgoingMessage(text) {
+            const stream = document.getElementById('chatStream');
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble msg-outgoing';
+            const wordsHtml = text.split(' ').map(w => `<span class="word" onclick="speakWord('${w}', this)">${w}</span>`).join(' ');
+            bubble.innerHTML = `
+                <div class="msg-top-row">
+                    <button class="audio-btn" onclick="playPhrase('${text.replace(/'/g, "\\'")}')">🔊</button>
+                    <div>${wordsHtml}</div>
+                </div>
+            `;
+            const indicator = document.getElementById('typingIndicator');
+            stream.insertBefore(bubble, indicator);
+        }
+
+        function scrollChat() {
+            const stream = document.getElementById('chatStream');
+            stream.scrollTop = stream.scrollHeight;
+        }
+
+        function toggleSkeletonHint() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            const h = document.getElementById('skeletonHint');
+            h.style.display = (h.style.display === 'none' || !h.style.display) ? 'block' : 'none';
+        }
+
+        function handleSend() {
+            const input = document.getElementById('chatInput');
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            const sc = SCENARIOS[activeScenarioIndex];
+            const stepData = sc.steps[currentStepIndex];
+            const normUser = normalize(userText);
+
+            const isMatch = stepData.variants.some(v => normalize(v) === normUser);
+
+            if (isMatch) {
+                if (typeof TMABridge !== 'undefined') TMABridge.haptic('medium');
+                appendOutgoingMessage(userText);
+                input.value = '';
+                scrollChat();
+
+                if (currentStepIndex < sc.steps.length - 1) {
+                    currentStepIndex++;
+                    setTimeout(showIncomingStep, 1000);
+                } else {
+                    if (typeof TMABridge !== 'undefined') TMABridge.haptic('heavy');
+                    setTimeout(() => {
+                        alert('🎉 Отлично! Вы успешно завершили эту жизненную переписку!');
+                    }, 800);
+                }
+            } else {
+                if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+                showVariantsModal(stepData.variants, stepData.exp);
+            }
+        }
+
+        function showVariantsModal(variants, exp) {
+            const list = document.getElementById('variantsList');
+            list.innerHTML = '';
+
+            variants.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'variant-item';
+                item.innerHTML = `
+                    <span style="flex:1;line-height:1.3;">${v}</span>
+                    <button style="background:none;border:none;color:#60a5fa;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;margin-left:8px;">Вставить ✍️</button>
+                `;
+                item.onclick = () => {
+                    if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+                    document.getElementById('chatInput').value = v;
+                    closeVariantsModal();
+                    document.getElementById('chatInput').focus();
+                };
+                list.appendChild(item);
+            });
+
+            document.getElementById('modalExp').innerHTML = `<b>Разбор:</b> ${exp}`;
+            document.getElementById('variantsModal').style.display = 'flex';
+        }
+
+        function closeVariantsModal() {
+            document.getElementById('variantsModal').style.display = 'none';
+        }
+
+        // DRAWER CONTROLLER
+        function openDrawer() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            renderDrawerList();
+            document.getElementById('drawerModal').style.display = 'flex';
+        }
+
+        function closeDrawer() {
+            document.getElementById('drawerModal').style.display = 'none';
+        }
+
+        function renderDrawerList() {
+            const list = document.getElementById('drawerList');
+            list.innerHTML = '';
+
+            SCENARIOS.forEach((sc, idx) => {
+                const isLocked = idx >= 2 && (!TMABridge || !TMABridge.isPremiumUser());
+                const item = document.createElement('div');
+                item.className = `drawer-item ${idx === activeScenarioIndex ? 'active' : ''}`;
+                item.innerHTML = `
+                    <div class="drawer-item-avatar">${sc.avatar}</div>
+                    <div class="drawer-item-content">
+                        <div class="drawer-item-title">${sc.title} ${isLocked ? '🔒' : ''}</div>
+                        <div class="drawer-item-desc">${sc.desc}</div>
+                    </div>
+                `;
+                item.onclick = () => {
+                    if (idx >= 2 && typeof TMABridge !== 'undefined') {
+                        if (!TMABridge.checkDemoLimit(idx, 2)) {
+                            closeDrawer();
+                            return;
+                        }
+                    }
+                    loadScenario(idx);
+                };
+                list.appendChild(item);
+            });
+        }
+
+        document.getElementById('chatInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadScenario(0);
+
+            if (typeof TMABridge !== 'undefined') {
+                TMABridge.setupBackButton('index.html');
+            }
+        });
+    </script>
+</body>
+</html>
