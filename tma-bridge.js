@@ -14,17 +14,33 @@ const TMABridge = (function () {
     // Состояние пользователя
     let isPremium = false;
     let audioUnlocked = false;
+    let selectedEnglishVoice = null;
 
-    // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS (Web Speech API)
-    // На iPhone синтез речи не работает, пока пользователь не сделает первый тап по экрану.
+    // Инициализация и поиск доступных английских голосов (критично для Android)
+    function initEnglishVoices() {
+        if (!window.speechSynthesis) return;
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || voices.length === 0) return;
+
+        selectedEnglishVoice = voices.find(v => v.lang === 'en-US' && !v.localService) ||
+                               voices.find(v => v.lang === 'en-US') ||
+                               voices.find(v => v.lang === 'en-GB') ||
+                               voices.find(v => v.lang.startsWith('en')) ||
+                               null;
+    }
+
+    if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = initEnglishVoices;
+        initEnglishVoices();
+    }
+
+    // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS И ANDROID
     function unlockAudio() {
-        if (audioUnlocked || !window.speechSynthesis) return;
-        const utter = new SpeechSynthesisUtterance('');
-        utter.volume = 0; // Беззвучный вызов
-        window.speechSynthesis.speak(utter);
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.resume();
+        initEnglishVoices();
         audioUnlocked = true;
         
-        // Удаляем слушатели после успешной разблокировки
         document.removeEventListener('touchstart', unlockAudio);
         document.removeEventListener('click', unlockAudio);
     }
@@ -97,6 +113,36 @@ const TMABridge = (function () {
             if (tg && tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred(style);
             }
+        },
+
+        // Универсальная озвучка для всех смартфонов и ПК
+        speak: function(text, rate = 0.88, onEndCallback = null) {
+            if (!window.speechSynthesis) return;
+
+            const synth = window.speechSynthesis;
+            synth.resume();
+            synth.cancel();
+
+            // Задержка 15 мс обходит баг сброса очереди в WebKit / Android WebView
+            setTimeout(() => {
+                const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
+                if (!clean) return;
+
+                const utter = new SpeechSynthesisUtterance(clean);
+                utter.lang = 'en-US';
+                utter.rate = rate;
+                utter.pitch = 1.0;
+
+                if (!selectedEnglishVoice) initEnglishVoices();
+                if (selectedEnglishVoice) utter.voice = selectedEnglishVoice;
+
+                if (typeof onEndCallback === 'function') {
+                    utter.onend = onEndCallback;
+                    utter.onerror = onEndCallback;
+                }
+
+                synth.speak(utter);
+            }, 15);
         },
 
         // Настройка кнопки "Назад"

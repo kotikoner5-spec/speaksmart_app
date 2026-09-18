@@ -9,6 +9,29 @@
     <link rel="stylesheet" href="theme.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="tma-bridge.js"></script>
+
+    <style>
+        /* Разблокировка скролла и сенсорного управления дашборда на смартфонах и ПК */
+        body {
+            height: auto !important;
+            min-height: 100dvh;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+
+        /* Мгновенный тактильный отклик карточек без задержки тапа на смартфонах */
+        .card {
+            touch-action: manipulation;
+            transition: transform 0.12s ease, border-color 0.15s ease;
+        }
+        .card:active {
+            transform: scale(0.98);
+            border-color: var(--primary);
+        }
+    </style>
 </head>
 <body>
 
@@ -234,11 +257,10 @@
         <div style="height: calc(50px + var(--sa-t)); padding-top: var(--sa-t); background: #111827; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; padding-left: calc(16px + var(--sa-l)); padding-right: calc(16px + var(--sa-r));">
             <div style="font-size: 0.9rem; font-weight: 800; color: #fff;" id="frameTitle">Модуль</div>
             <div style="display: flex; gap: 8px;">
-                <button style="background: #1f2937; border: 1px solid var(--card-border); color: #f8fafc; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;" onclick="openInNewTab()">В браузере ↗</button>
                 <button style="background: var(--primary); border: none; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;" onclick="closeModule()">✕ Закрыть</button>
             </div>
         </div>
-        <iframe id="appFrame" style="width: 100%; height: calc(100% - 50px - var(--sa-t)); border: none; background: var(--bg-color);" src="about:blank"></iframe>
+        <iframe id="appFrame" allow="autoplay" style="width: 100%; height: calc(100% - 50px - var(--sa-t)); border: none; background: var(--bg-color); -webkit-overflow-scrolling: touch; touch-action: auto;" src="about:blank"></iframe>
     </div>
 
     <script>
@@ -258,12 +280,31 @@
             document.getElementById('frameTitle').innerText = title;
             document.getElementById('appFrame').src = url;
             document.getElementById('frameOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Защита от конфликта скролла при открытом модуле
             
             // Показываем нативную кнопку "Назад" в Telegram, чтобы закрыть iframe
             if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
                 window.Telegram.WebApp.BackButton.show();
                 // Привязываем закрытие модуля к нативной кнопке
                 window.Telegram.WebApp.BackButton.onClick(closeModuleNative);
+            }
+        }
+
+        function closeModuleNative() {
+            closeModule();
+        }
+
+        function closeModule() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            document.getElementById('frameOverlay').style.display = 'none';
+            document.getElementById('appFrame').src = 'about:blank';
+            document.body.style.overflow = ''; // Восстанавливаем управление дашбордом
+            document.body.style.overflowY = 'auto';
+            
+            // Скрываем нативную кнопку "Назад" и убираем обработчик
+            if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
+                window.Telegram.WebApp.BackButton.hide();
+                window.Telegram.WebApp.BackButton.offClick(closeModuleNative);
             }
         }
 

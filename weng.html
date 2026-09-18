@@ -1697,35 +1697,27 @@ weather the storm|стойко пережить кризис или невзго
         // =========================================================================
 
         // ДВИЖОК ПРИЛОЖЕНИЯ
-        const DEMO_LIMIT = 15; // Бесплатный лимит слов в демо-версии
+        const DEMO_LIMIT = 10; // Бесплатный лимит слов в демо-версии
         const BATCH_SIZE = 50;
-
-        const synth = window.speechSynthesis;
 
         function speakWord(cleanWord, el) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            if (!synth) return;
-            synth.cancel();
 
             document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
             if (el) el.classList.add('speaking');
 
-            const utter = new SpeechSynthesisUtterance(cleanWord);
-            utter.lang = 'en-US';
-            utter.rate = 0.86;
-            utter.onend = () => { if (el) el.classList.remove('speaking'); };
-            synth.speak(utter);
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(cleanWord, 0.86, () => {
+                    if (el) el.classList.remove('speaking');
+                });
+            }
         }
 
         function speakPhrase(phrase) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            if (!synth) return;
-            synth.cancel();
-
-            const utter = new SpeechSynthesisUtterance(phrase);
-            utter.lang = 'en-US';
-            utter.rate = 0.9;
-            synth.speak(utter);
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(phrase, 0.9);
+            }
         }
 
         let database = [];
@@ -1850,7 +1842,7 @@ weather the storm|стойко пережить кризис или невзго
                     <div style="font-size: 2rem;">🔒</div>
                     <div style="font-size: 1.1rem; font-weight: 800; color: #fff;">Ознакомительный лимит исчерпан</div>
                     <div style="font-size: 0.85rem; color: var(--text-muted); max-width: 320px;">
-                        Вам доступны первые 15 слов. Разблокируйте всю базу из 10 000+ слов, идиом и глаголов навсегда.
+                        Вам доступны первые 10 слов. Разблокируйте всю базу слов, идиом и глаголов навсегда.
                     </div>
                     <button class="paywall-btn" style="margin-top: 6px;" onclick="TMABridge.showPaywall()">
                         Разблокировать словарь за ⭐️ Stars

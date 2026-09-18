@@ -14,7 +14,6 @@
 
     <div class="header">
         <div class="counter" id="slideCounter">1 / 8</div>
-        <div class="swipe-hint">← листайте пальцем →</div>
     </div>
 
     <!-- Navigation Buttons -->
@@ -349,34 +348,26 @@
 
     <script>
         // TEXT TO SPEECH ENGINE
-        const synth = window.speechSynthesis;
-
         function speakWord(word, element) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            synth.cancel();
 
             document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
             if (element) element.classList.add('speaking');
 
             const cleanWord = word.replace(/[^a-zA-Z']/g, '');
-            const utter = new SpeechSynthesisUtterance(cleanWord);
-            utter.lang = 'en-US';
-            utter.rate = 0.85;
-
-            utter.onend = () => {
-                if (element) element.classList.remove('speaking');
-            };
-
-            synth.speak(utter);
+            
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(cleanWord, 0.85, () => {
+                    if (element) element.classList.remove('speaking');
+                });
+            }
         }
 
         function playWholePhrase(phrase) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            synth.cancel();
-            const utter = new SpeechSynthesisUtterance(phrase);
-            utter.lang = 'en-US';
-            utter.rate = 0.9;
-            synth.speak(utter);
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(phrase, 0.9);
+            }
         }
 
         // Attach Click Listeners
@@ -403,11 +394,11 @@
         slider.addEventListener('scroll', () => {
             const page = Math.round(slider.scrollLeft / window.innerWidth);
             
-            // Freemium Check: Если свайпнули на 3-й слайд (индекс 2) и нет премиума
-            if (page >= 2 && typeof TMABridge !== 'undefined') {
-                if (!TMABridge.checkDemoLimit(page, 2)) {
-                    // Возвращаем пользователя на последний доступный слайд (индекс 1)
-                    slider.scrollLeft = 1 * window.innerWidth;
+            // Freemium Check: Если свайпнули на 2-й слайд (индекс 1) и нет премиума
+            if (page >= 1 && typeof TMABridge !== 'undefined') {
+                if (!TMABridge.checkDemoLimit(page, 1)) {
+                    // Возвращаем пользователя на единственный бесплатный слайд (индекс 0)
+                    slider.scrollLeft = 0;
                     return;
                 }
             }
@@ -419,8 +410,8 @@
         function nextSlide() {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
             
-            // Freemium Check при нажатии кнопки "Вперед"
-            if (typeof TMABridge !== 'undefined' && !TMABridge.checkDemoLimit(currentPage + 1, 2)) {
+            // Freemium Check при нажатии кнопки "Вперед" (блокирует уже при попытке перейти на 2-й слайд)
+            if (typeof TMABridge !== 'undefined' && !TMABridge.checkDemoLimit(currentPage + 1, 1)) {
                 return; // Блокируем переход, пэйволл уже показан
             }
 

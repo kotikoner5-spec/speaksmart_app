@@ -433,26 +433,21 @@
             { ch: 'Zz', sound: '[zed / ziː]', ru: 'зед / зи', ex: 'Zebra', emoji: '🦓' }
         ];
 
-        const synth = window.speechSynthesis;
-
         function speak(text) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            synth.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US';
-            u.rate = 0.85;
-            synth.speak(u);
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(text, 0.85);
+            }
         }
 
         function speakLetter(char, exampleWord) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            synth.cancel();
             const letterOnly = char[0];
-            const u = new SpeechSynthesisUtterance(letterOnly);
-            u.lang = 'en-US';
-            u.rate = 0.8;
-            synth.speak(u);
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(letterOnly, 0.8);
+            }
         }
+
 
         function renderAlphabet() {
             const grid = document.getElementById('abcGrid');

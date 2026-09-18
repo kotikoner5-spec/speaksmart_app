@@ -909,28 +909,24 @@
         let activeScenarioIndex = 0;
         let currentStepIndex = 0;
 
-        const synth = window.speechSynthesis;
-
         function speakWord(word, el) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            synth.cancel();
             document.querySelectorAll('.word').forEach(w => w.classList.remove('speaking'));
             if (el) el.classList.add('speaking');
             const clean = word.replace(/[^a-zA-Z']/g, '');
-            const u = new SpeechSynthesisUtterance(clean);
-            u.lang = 'en-US';
-            u.rate = 0.85;
-            u.onend = () => { if (el) el.classList.remove('speaking'); };
-            synth.speak(u);
+            
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(clean, 0.85, () => {
+                    if (el) el.classList.remove('speaking');
+                });
+            }
         }
 
         function playPhrase(text) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            synth.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US';
-            u.rate = 0.9;
-            synth.speak(u);
+            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
+                TMABridge.speak(text, 0.9);
+            }
         }
 
         function normalize(str) {
