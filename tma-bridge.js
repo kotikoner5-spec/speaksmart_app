@@ -26,41 +26,76 @@ const TMABridge = (function () {
     // Определение платформы: на Android WebView нативный SpeechSynthesis часто заблокирован системой
     const isAndroidDevice = /Android/i.test(navigator.userAgent);
     
-    // Единый глобальный аудио-плеер для Android с мгновенным откликом (~150мс)
-    let tmaFastAudio = new Audio();
-
-    function playFastGoogleTts(text, onEnd) {
+    // Блокируем передачу Referer на Android, чтобы Google не отдавал 403 Forbidden
+    if (isAndroidDevice && typeof document !== 'undefined') {
         try {
-            tmaFastAudio.pause();
-            tmaFastAudio.currentTime = 0;
+            if (!document.querySelector('meta[name="referrer"]')) {
+                const meta = document.createElement('meta');
+                meta.name = 'referrer';
+                meta.content = 'no-referrer';
+                document.head.appendChild(meta);
+            }
+        } catch (e) {}
+    }
 
-            const clean = encodeURIComponent(text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim());
-            if (!clean) {
+    let tmaAudioEl = null;
+
+    function getTmaAudioElement() {
+        if (!tmaAudioEl) {
+            tmaAudioEl = document.createElement('audio');
+            tmaAudioEl.setAttribute('referrerpolicy', 'no-referrer');
+            tmaAudioEl.preload = 'auto';
+            document.body.appendChild(tmaAudioEl);
+        }
+        return tmaAudioEl;
+    }
+
+    // Скоростной плеер с обходом 403 Forbidden и резервным каналом
+    function playAndroidCleanAudio(text, onEnd) {
+        try {
+            const raw = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
+            if (!raw) {
                 if (typeof onEnd === 'function') onEnd();
                 return;
             }
 
-            // Прямой вызов скоростного Google Edge CDN
-            tmaFastAudio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${clean}`;
+            const audio = getTmaAudioElement();
+            audio.pause();
+            audio.currentTime = 0;
 
-            tmaFastAudio.onended = () => {
+            const clean = encodeURIComponent(raw);
+            const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${clean}`;
+            const youdaoUrl = `https://dict.youdao.com/dictvoice?audio=${clean}&type=2`;
+
+            audio.src = googleUrl;
+
+            audio.onended = () => {
                 if (typeof onEnd === 'function') onEnd();
             };
 
-            tmaFastAudio.onerror = () => {
-                if (typeof onEnd === 'function') onEnd();
+            // Если Google заблокирован — мгновенный переход на Youdao
+            audio.onerror = () => {
+                if (audio.src !== youdaoUrl) {
+                    audio.src = youdaoUrl;
+                    audio.play().catch(() => { if (typeof onEnd === 'function') onEnd(); });
+                } else {
+                    if (typeof onEnd === 'function') onEnd();
+                }
             };
 
-            const p = tmaFastAudio.play();
+            const p = audio.play();
             if (p !== undefined) {
-                p.catch(() => { if (typeof onEnd === 'function') onEnd(); });
+                p.catch((err) => {
+                    console.warn("Autoplay notice:", err);
+                    if (typeof onEnd === 'function') onEnd();
+                });
             }
         } catch (e) {
             if (typeof onEnd === 'function') onEnd();
         }
     }
 
-    // КРИТИЧЕСКИЙ ФИКС: На Android ПРИНУДИТЕЛЬНО заменяем пустую заглушку с 0 голосов на рабочий плеер
+    // КРИТИЧЕСКИЙ ФИКС: Полноценный активный синтезатор для Android
     if (typeof window !== 'undefined' && isAndroidDevice) {
         window.SpeechSynthesisUtterance = function(text) {
             this.text = text || '';
@@ -77,22 +112,22 @@ const TMABridge = (function () {
             pending: false,
             cancel: function() {
                 try {
-                    tmaFastAudio.pause();
-                    tmaFastAudio.currentTime = 0;
+                    const a = getTmaAudioElement();
+                    a.pause();
+                    a.currentTime = 0;
                 } catch(e) {}
             },
             resume: function() {},
             pause: function() {},
             getVoices: function() {
-                // Возвращаем активный виртуальный голос для Android
-                return [{ name: 'Google Cloud Voice HD', lang: 'en-US', default: true }];
+                return [{ name: 'Google Cloud Voice HD (No-Referrer)', lang: 'en-US', default: true }];
             },
             speak: function(utterance) {
                 if (!utterance || !utterance.text) {
                     if (typeof utterance?.onend === 'function') utterance.onend();
                     return;
                 }
-                playFastGoogleTts(utterance.text, () => {
+                playAndroidCleanAudio(utterance.text, () => {
                     if (typeof utterance.onend === 'function') utterance.onend();
                 });
             }
