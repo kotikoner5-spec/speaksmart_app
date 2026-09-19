@@ -26,19 +26,73 @@ const TMABridge = (function () {
     // Определение платформы: на Android WebView нативный SpeechSynthesis часто заблокирован системой
     const isAndroidDevice = /Android/i.test(navigator.userAgent);
     
-    // Глобальная ссылка для предотвращения удаления объекта речи сборщиком мусора Android V8
-    window._tmaActiveUtterance = null;
+    // Единый глобальный аудио-плеер для Android с мгновенным откликом
+    let tmaFastAudio = null;
 
-    // Функция диагностического окна для Android
-    function showAndroidTtsDebug(title, details) {
-        const msg = `🔍 [Android TTS Диагностика]\n\n${title}\n\n${details}`;
-        if (window.Telegram?.WebApp?.showAlert) {
-            window.Telegram.WebApp.showAlert(msg);
-        } else if (window.parent?.Telegram?.WebApp?.showAlert) {
-            window.parent.Telegram.WebApp.showAlert(msg);
-        } else {
-            alert(msg);
+    function playFastGoogleTts(text, onEnd) {
+        try {
+            if (!tmaFastAudio) {
+                tmaFastAudio = new Audio();
+            }
+            tmaFastAudio.pause();
+            tmaFastAudio.currentTime = 0;
+
+            const clean = encodeURIComponent(text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim());
+            if (!clean) {
+                if (typeof onEnd === 'function') onEnd();
+                return;
+            }
+
+            // Google CDN с серверами в Европе/СНГ (отклик ~200мс без задержек Китая)
+            tmaFastAudio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${clean}`;
+
+            tmaFastAudio.onended = () => {
+                if (typeof onEnd === 'function') onEnd();
+            };
+
+            tmaFastAudio.onerror = () => {
+                if (typeof onEnd === 'function') onEnd();
+            };
+
+            const p = tmaFastAudio.play();
+            if (p !== undefined) {
+                p.catch(() => { if (typeof onEnd === 'function') onEnd(); });
+            }
+        } catch (e) {
+            if (typeof onEnd === 'function') onEnd();
         }
+    }
+
+    // ПОЛИФИЛЛ ДЛЯ ANDROID: спасает все 10 файлов от падения при отсутствии SpeechSynthesis
+    if (typeof window !== 'undefined' && !window.speechSynthesis) {
+        window.SpeechSynthesisUtterance = function(text) {
+            this.text = text || '';
+            this.lang = 'en-US';
+            this.rate = 1.0;
+            this.onstart = null;
+            this.onend = null;
+            this.onerror = null;
+        };
+
+        window.speechSynthesis = {
+            speaking: false,
+            paused: false,
+            pending: false,
+            cancel: function() {
+                if (tmaFastAudio) {
+                    tmaFastAudio.pause();
+                    tmaFastAudio.currentTime = 0;
+                }
+            },
+            resume: function() {},
+            pause: function() {},
+            getVoices: function() { return []; },
+            speak: function(utterance) {
+                playFastGoogleTts(utterance.text, () => {
+                    if (typeof utterance.onend === 'function') utterance.onend();
+                });
+            }
+        };
     }
 
     // ЕДИНАЯ ОЗВУЧКА: Диагностический перехватчик Android Chromium
@@ -238,11 +292,20 @@ const TMABridge = (function () {
 
         // Универсальная озвучка для всех смартфонов и ПК
         speak: function(text, rate = 0.88, onEndCallback = null) {
-            const synth = getSpeechSynth();
-            if (!synth) return;
-
             const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
             if (!clean) return;
+
+            // Если на Android нет нативного синтезатора - сразу запускаем скоростной Google CDN
+            if (isAndroidDevice && (!window.speechSynthesis || window.speechSynthesis.getVoices().length === 0)) {
+                playFastGoogleTts(clean, onEndCallback);
+                return;
+            }
+
+            const synth = window.speechSynthesis;
+            if (!synth) {
+                playFastGoogleTts(clean, onEndCallback);
+                return;
+            }
 
             try { synth.resume(); } catch (e) {}
 
