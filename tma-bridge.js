@@ -141,49 +141,54 @@ const TMABridge = (function () {
             const synth = getSpeechSynth();
             if (!synth) return;
 
+            // Будим аудио-движок в момент тапа (критично для Android WebView)
+            try { synth.resume(); } catch (e) {}
+
             const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
             if (!clean) return;
 
-            // На Android WebView вызов cancel() когда речь не идет может намертво сломать движок
-            if (synth.speaking || synth.pending) {
-                synth.cancel();
+            if (synth.speaking) {
+                try { synth.cancel(); } catch (e) {}
             }
 
-            // Android fallback: если голоса еще не загрузились, пробуем загрузить прямо перед речью
+            const utter = new SpeechSynthesisUtterance(clean);
+            utter.lang = 'en-US';
+            utter.rate = rate;
+            utter.pitch = 1.0;
+            utter.volume = 1.0;
+
             if (!selectedEnglishVoice) initEnglishVoices();
+            if (selectedEnglishVoice) {
+                utter.voice = selectedEnglishVoice;
+            }
 
-            // Задержка 50 мс для очистки буфера Android после cancel()
-            setTimeout(() => {
-                const utter = new SpeechSynthesisUtterance(clean);
-                utter.lang = 'en-US';
-                utter.rate = rate;
-                utter.pitch = 1.0;
-                utter.volume = 1.0;
+            // Защита для Android: удерживаем ссылку от сборщика мусора V8
+            window._tmaActiveUtterance = utter;
 
-                if (selectedEnglishVoice) {
-                    utter.voice = selectedEnglishVoice;
-                }
+            const finishHandler = () => {
+                window._tmaActiveUtterance = null;
+                if (typeof onEndCallback === 'function') onEndCallback();
+            };
 
-                // Защита для Android: сохраняем в window, чтобы V8 GC не уничтожил объект
-                window._tmaActiveUtterance = utter;
+            utter.onend = finishHandler;
+            utter.onerror = (e) => {
+                console.warn("TMA Bridge TTS Error:", e);
+                finishHandler();
+            };
 
-                const finishHandler = () => {
-                    window._tmaActiveUtterance = null;
-                    if (typeof onEndCallback === 'function') onEndCallback();
-                };
-
-                utter.onend = finishHandler;
-                utter.onerror = (e) => {
-                    console.warn("TMA Bridge TTS Error:", e);
-                    finishHandler();
-                };
-
-                synth.speak(utter);
-            }, 50);
+            // Синхронный запуск в рамках тапа + повторный resume для Android
+            synth.speak(utter);
+            try { synth.resume(); } catch (e) {}
         },
 
         // Настройка кнопки "Назад"
         setupBackButton: function(backUrl = 'index.html') {
+            // Если код выполняется внутри iframe, блокируем перезапись кнопки!
+            // Ей должно управлять только главное окно (index.html), чтобы корректно срабатывал таймер.
+            if (window.self !== window.top) {
+                return;
+            }
+
             if (tg && tg.BackButton) {
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => {

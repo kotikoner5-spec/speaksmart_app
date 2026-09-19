@@ -1315,6 +1315,17 @@
             renderPath();
         });
 
+        // АВТООБНОВЛЕНИЕ: Перерисовываем UI, когда пользователь возвращается в приложение
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                initStreak();
+                // Обновляем дашборд только если не открыт модуль (iframe)
+                if (!activeTask && document.getElementById('frameOverlay').style.display !== 'flex') {
+                    renderPath();
+                }
+            }
+        });
+
         function initStreak() {
             const today = getTodayString();
             let lastVisit = localStorage.getItem('eng_last_visit');
