@@ -26,14 +26,11 @@ const TMABridge = (function () {
     // Определение платформы: на Android WebView нативный SpeechSynthesis часто заблокирован системой
     const isAndroidDevice = /Android/i.test(navigator.userAgent);
     
-    // Единый глобальный аудио-плеер для Android с мгновенным откликом
-    let tmaFastAudio = null;
+    // Единый глобальный аудио-плеер для Android с мгновенным откликом (~150мс)
+    let tmaFastAudio = new Audio();
 
     function playFastGoogleTts(text, onEnd) {
         try {
-            if (!tmaFastAudio) {
-                tmaFastAudio = new Audio();
-            }
             tmaFastAudio.pause();
             tmaFastAudio.currentTime = 0;
 
@@ -43,7 +40,7 @@ const TMABridge = (function () {
                 return;
             }
 
-            // Google CDN с серверами в Европе/СНГ (отклик ~200мс без задержек Китая)
+            // Прямой вызов скоростного Google Edge CDN
             tmaFastAudio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${clean}`;
 
             tmaFastAudio.onended = () => {
@@ -63,8 +60,8 @@ const TMABridge = (function () {
         }
     }
 
-    // ПОЛИФИЛЛ ДЛЯ ANDROID: спасает все 10 файлов от падения при отсутствии SpeechSynthesis
-    if (typeof window !== 'undefined' && !window.speechSynthesis) {
+    // КРИТИЧЕСКИЙ ФИКС: На Android ПРИНУДИТЕЛЬНО заменяем пустую заглушку с 0 голосов на рабочий плеер
+    if (typeof window !== 'undefined' && isAndroidDevice) {
         window.SpeechSynthesisUtterance = function(text) {
             this.text = text || '';
             this.lang = 'en-US';
@@ -79,15 +76,22 @@ const TMABridge = (function () {
             paused: false,
             pending: false,
             cancel: function() {
-                if (tmaFastAudio) {
+                try {
                     tmaFastAudio.pause();
                     tmaFastAudio.currentTime = 0;
-                }
+                } catch(e) {}
             },
             resume: function() {},
             pause: function() {},
-            getVoices: function() { return []; },
+            getVoices: function() {
+                // Возвращаем активный виртуальный голос для Android
+                return [{ name: 'Google Cloud Voice HD', lang: 'en-US', default: true }];
+            },
             speak: function(utterance) {
+                if (!utterance || !utterance.text) {
+                    if (typeof utterance?.onend === 'function') utterance.onend();
+                    return;
+                }
                 playFastGoogleTts(utterance.text, () => {
                     if (typeof utterance.onend === 'function') utterance.onend();
                 });

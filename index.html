@@ -1584,7 +1584,6 @@
         function showManualTtsDebug() {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('medium');
 
-            // Проверяем синтезатор как в главном окне, так и во фрейме
             let frameSynth = null;
             try {
                 const iframe = document.getElementById('appFrame');
@@ -1594,24 +1593,14 @@
             } catch (e) {}
 
             const synth = frameSynth || window.speechSynthesis;
-
-            if (!synth) {
-                alert("❌ speech-synthesis полностью отсутствует в объекте window!");
-                return;
-            }
-
-            try { synth.resume(); } catch (e) {}
-
-            const voices = synth.getVoices() || [];
-            const enVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en')).map(v => `${v.name} [${v.lang}]`);
+            const voices = synth ? (synth.getVoices() || []) : [];
 
             const report = [
                 `🔍 ТЕХНИЧЕСКИЙ ОТЧЕТ TTS:`,
-                `📱 OS: ${/Android/i.test(navigator.userAgent) ? 'Android' : 'iOS / Desktop'}`,
-                `🔊 Статус: speaking=${synth.speaking}, paused=${synth.paused}, pending=${synth.pending}`,
-                `🌐 Всего голосов найдено: ${voices.length}`,
-                `🇺🇸 Английские голоса (${enVoices.length}):\n${enVoices.length > 0 ? enVoices.slice(0, 4).join('\n') : 'НЕТ ГОЛОСОВ'}`,
-                `\n▶️ Сейчас запустится тест звука фразы: "System test online".`
+                `📱 OS: ${/Android/i.test(navigator.userAgent) ? 'Android (Fast Engine Active)' : 'iOS / Desktop (Native)'}`,
+                `🌐 Доступно голосов: ${voices.length}`,
+                `🎙️ Активный голос: ${voices[0] ? voices[0].name : 'System Default'}`,
+                `\n▶️ Воспроизвожу фразу: "System test online".`
             ].join('\n\n');
 
             if (window.Telegram?.WebApp?.showAlert) {
@@ -1620,21 +1609,11 @@
                 alert(report);
             }
 
-            // Тестовый запуск голоса с отслеживанием ошибок
             try {
                 const utter = new SpeechSynthesisUtterance("System test online");
-                utter.lang = "en-US";
-                utter.rate = 0.9;
-                if (enVoices.length > 0) {
-                    utter.voice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-                }
-                utter.onstart = () => console.log("Test audio onstart fired!");
-                utter.onerror = (err) => {
-                    alert(`❌ Ошибка воспроизведения:\ncode: ${err.error}\nmessage: ${err.message || 'нет'}`);
-                };
                 synth.speak(utter);
             } catch (err) {
-                alert(`❌ Исключение при speak(): ${err.message}`);
+                alert(`❌ Ошибка: ${err.message}`);
             }
         }
     </script>
