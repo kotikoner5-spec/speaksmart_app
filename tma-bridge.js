@@ -26,80 +26,58 @@ const TMABridge = (function () {
     // Определение платформы: на Android WebView нативный SpeechSynthesis часто заблокирован системой
     const isAndroidDevice = /Android/i.test(navigator.userAgent);
     
-    // Единый переиспользуемый аудио-элемент для Android (убирает задержку создания)
-    let sharedAndroidAudio = null;
-
-    function getAndroidAudio() {
-        if (!sharedAndroidAudio) {
-            sharedAndroidAudio = new Audio();
-        }
-        return sharedAndroidAudio;
-    }
-
-    // Быстрый стриминг для Android с разделением на слова и целые фразы
-    function playStreamAudio(text, onEnd) {
-        try {
-            const cleanText = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
-            if (!cleanText) {
-                if (typeof onEnd === 'function') onEnd();
-                return;
-            }
-
-            const audio = getAndroidAudio();
-            
-            // Мгновенно обрываем предыдущий звук без зависания
-            audio.pause();
-            audio.currentTime = 0;
-
-            const cleanEncoded = encodeURIComponent(cleanText);
-
-            // УМНЫЙ РОУТЕР:
-            // Если фраза из нескольких слов или длинная — используем мгновенный Google TTS без лимита слов
-            // Если отдельное слово — берем студийное произношение Oxford
-            if (cleanText.includes(' ') || cleanText.length > 15) {
-                audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${cleanEncoded}`;
-            } else {
-                audio.src = `https://dict.youdao.com/dictvoice?audio=${cleanEncoded}&type=2`;
-            }
-
-            audio.onended = () => {
-                if (typeof onEnd === 'function') onEnd();
-            };
-
-            audio.onerror = () => {
-                // Запасной канал при сбое сети
-                audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${cleanEncoded}`;
-                audio.play().catch(() => { if (typeof onEnd === 'function') onEnd(); });
-            };
-
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch((e) => {
-                    console.warn("Audio playback notice:", e);
-                    if (typeof onEnd === 'function') onEnd();
-                });
-            }
-        } catch (e) {
-            if (typeof onEnd === 'function') onEnd();
-        }
-    }
-
-    // Глобальная ссылка для предотвращения удаления объекта речи сборщиком мусора Android (GC Bug)
+    // Глобальная ссылка для предотвращения удаления объекта речи сборщиком мусора Android V8
     window._tmaActiveUtterance = null;
 
-    // ЕДИНАЯ ОЗВУЧКА: Перехватываем вызовы synth.speak во ВСЕХ 10 файлах проекта
+    // ЕДИНАЯ ОЗВУЧКА: Патчим движок Android Chromium прямо в памяти (0 мс задержки, без сети)
     if (typeof window !== 'undefined' && window.speechSynthesis) {
         const nativeSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
-        window.speechSynthesis.speak = function(utterance) {
-            if (isAndroidDevice) {
-                const phrase = utterance.text || '';
-                playStreamAudio(phrase, () => {
-                    if (typeof utterance.onend === 'function') utterance.onend();
-                });
-            } else {
+        const nativeCancel = window.speechSynthesis.cancel ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
+
+        if (isAndroidDevice) {
+            // КРИТИЧЕСКИЙ ФИКС ANDROID: Блокируем synth.cancel(), который убивал звуковой процесс в Chromium
+            window.speechSynthesis.cancel = function() {
+                // На Android отмена речи выключена: она ломает системный мост Android TTS
+            };
+
+            // Мгновенное нативное воспроизведение без внешних серверов
+            window.speechSynthesis.speak = function(utterance) {
+                if (!utterance) return;
+
+                try { window.speechSynthesis.resume(); } catch (e) {}
+
+                utterance.lang = 'en-US';
+                utterance.rate = utterance.rate || 0.9;
+
+                // Подбор голоса, если он готов
+                const voices = window.speechSynthesis.getVoices();
+                if (voices && voices.length > 0) {
+                    const enVoice = voices.find(v => v.lang && v.lang.replace('_', '-').includes('en-US')) ||
+                                    voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+                    if (enVoice) utterance.voice = enVoice;
+                }
+
+                // Защита от V8 Garbage Collector
+                window._tmaActiveUtterance = utterance;
+
+                const origEnd = utterance.onend;
+                const origErr = utterance.onerror;
+
+                utterance.onend = function(ev) {
+                    window._tmaActiveUtterance = null;
+                    if (typeof origEnd === 'function') origEnd.call(this, ev);
+                };
+
+                utterance.onerror = function(ev) {
+                    window._tmaActiveUtterance = null;
+                    if (typeof origErr === 'function') origErr.call(this, ev);
+                };
+
+                // Нативный мгновенный запуск речи
                 nativeSpeak(utterance);
-            }
-        };
+                try { window.speechSynthesis.resume(); } catch (e) {}
+            };
+        }
     }
 
     // Инициализация и поиск доступных английских голосов (для iPhone и ПК)
@@ -129,16 +107,8 @@ const TMABridge = (function () {
 
     // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS И ANDROID (Включая автоозвучку диалогов)
     function unlockAudio() {
-        if (isAndroidDevice) {
-            // Разблокируем Autoplay для входящих сообщений в meng.html (беззвучный микро-импульс)
-            try {
-                const a = getAndroidAudio();
-                a.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-                a.play().then(() => { a.pause(); }).catch(() => {});
-            } catch (e) {}
-        } else {
-            const synth = getSpeechSynth();
-            if (!synth) return;
+        const synth = getSpeechSynth();
+        if (synth) {
             try { synth.resume(); } catch (e) {}
             initEnglishVoices();
         }
@@ -220,27 +190,13 @@ const TMABridge = (function () {
 
         // Универсальная озвучка для всех смартфонов и ПК
         speak: function(text, rate = 0.88, onEndCallback = null) {
+            const synth = getSpeechSynth();
+            if (!synth) return;
+
             const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
             if (!clean) return;
 
-            // На Android используем бронебойный аудиопоток, гарантирующий звук в Telegram
-            if (isAndroidDevice) {
-                playStreamAudio(clean, onEndCallback);
-                return;
-            }
-
-            // На iPhone и ПК используем нативный движок Web Speech API
-            const synth = getSpeechSynth();
-            if (!synth) {
-                playStreamAudio(clean, onEndCallback);
-                return;
-            }
-
             try { synth.resume(); } catch (e) {}
-
-            if (synth.speaking) {
-                try { synth.cancel(); } catch (e) {}
-            }
 
             const utter = new SpeechSynthesisUtterance(clean);
             utter.lang = 'en-US';
@@ -248,18 +204,10 @@ const TMABridge = (function () {
             utter.pitch = 1.0;
             utter.volume = 1.0;
 
-            if (!selectedEnglishVoice) initEnglishVoices();
-            if (selectedEnglishVoice) utter.voice = selectedEnglishVoice;
-
-            window._tmaActiveUtterance = utter;
-
-            const finishHandler = () => {
-                window._tmaActiveUtterance = null;
-                if (typeof onEndCallback === 'function') onEndCallback();
-            };
-
-            utter.onend = finishHandler;
-            utter.onerror = finishHandler;
+            if (typeof onEndCallback === 'function') {
+                utter.onend = onEndCallback;
+                utter.onerror = onEndCallback;
+            }
 
             synth.speak(utter);
         },
