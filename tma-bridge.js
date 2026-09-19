@@ -29,51 +29,99 @@ const TMABridge = (function () {
     // Глобальная ссылка для предотвращения удаления объекта речи сборщиком мусора Android V8
     window._tmaActiveUtterance = null;
 
-    // ЕДИНАЯ ОЗВУЧКА: Патчим движок Android Chromium прямо в памяти (0 мс задержки, без сети)
+    // Функция диагностического окна для Android
+    function showAndroidTtsDebug(title, details) {
+        const msg = `🔍 [Android TTS Диагностика]\n\n${title}\n\n${details}`;
+        if (window.Telegram?.WebApp?.showAlert) {
+            window.Telegram.WebApp.showAlert(msg);
+        } else if (window.parent?.Telegram?.WebApp?.showAlert) {
+            window.parent.Telegram.WebApp.showAlert(msg);
+        } else {
+            alert(msg);
+        }
+    }
+
+    // ЕДИНАЯ ОЗВУЧКА: Диагностический перехватчик Android Chromium
     if (typeof window !== 'undefined' && window.speechSynthesis) {
         const nativeSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
-        const nativeCancel = window.speechSynthesis.cancel ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
 
         if (isAndroidDevice) {
-            // КРИТИЧЕСКИЙ ФИКС ANDROID: Блокируем synth.cancel(), который убивал звуковой процесс в Chromium
-            window.speechSynthesis.cancel = function() {
-                // На Android отмена речи выключена: она ломает системный мост Android TTS
-            };
+            // Блокируем вызов cancel(), обрывающий IPC-канал Android TTS
+            window.speechSynthesis.cancel = function() {};
 
-            // Мгновенное нативное воспроизведение без внешних серверов
             window.speechSynthesis.speak = function(utterance) {
                 if (!utterance) return;
+
+                const startTime = Date.now();
+                const phrase = (utterance.text || '').trim();
 
                 try { window.speechSynthesis.resume(); } catch (e) {}
 
                 utterance.lang = 'en-US';
                 utterance.rate = utterance.rate || 0.9;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
 
-                // Подбор голоса, если он готов
-                const voices = window.speechSynthesis.getVoices();
-                if (voices && voices.length > 0) {
-                    const enVoice = voices.find(v => v.lang && v.lang.replace('_', '-').includes('en-US')) ||
-                                    voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
-                    if (enVoice) utterance.voice = enVoice;
+                const voices = window.speechSynthesis.getVoices() || [];
+                const enVoice = voices.find(v => v.lang && v.lang.replace('_', '-').includes('en-US')) ||
+                                voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+                
+                if (enVoice) {
+                    utterance.voice = enVoice;
                 }
 
-                // Защита от V8 Garbage Collector
                 window._tmaActiveUtterance = utterance;
 
                 const origEnd = utterance.onend;
                 const origErr = utterance.onerror;
 
+                // Таймер зависания: если за 2 секунды движок не подал сигнал старта
+                let hasStarted = false;
+                const freezeTimer = setTimeout(() => {
+                    if (!hasStarted) {
+                        showAndroidTtsDebug(
+                            '⚠️ ДВИЖОК НЕ ОТВЕЧАЕТ (Зависание > 2 сек)',
+                            `Текст: "${phrase}"\n` +
+                            `Голосов в системе: ${voices.length}\n` +
+                            `Выбран голос: ${enVoice ? enVoice.name : 'НЕТ (дефолт)'}\n` +
+                            `Статус synth: speaking=${window.speechSynthesis.speaking}, paused=${window.speechSynthesis.paused}\n\n` +
+                            `Причина: Системный сервис TTS на смартфоне спит или заблокирован разрешениями.`
+                        );
+                    }
+                }, 2000);
+
+                utterance.onstart = function(ev) {
+                    hasStarted = true;
+                    clearTimeout(freezeTimer);
+                    const diff = Date.now() - startTime;
+                    // Если задержка больше 1.5 сек, покажем отчет о задержке
+                    if (diff > 1500) {
+                        showAndroidTtsDebug(
+                            `⏱️ Задержка старта: ${diff} мс`,
+                            `Текст: "${phrase}"\nГолос: ${enVoice ? enVoice.name : 'системный'}`
+                        );
+                    }
+                };
+
                 utterance.onend = function(ev) {
+                    clearTimeout(freezeTimer);
                     window._tmaActiveUtterance = null;
                     if (typeof origEnd === 'function') origEnd.call(this, ev);
                 };
 
                 utterance.onerror = function(ev) {
+                    clearTimeout(freezeTimer);
                     window._tmaActiveUtterance = null;
+                    showAndroidTtsDebug(
+                        '❌ ОШИБКА ANDROID TTS',
+                        `Код ошибки: "${ev.error}"\n` +
+                        `Текст: "${phrase}"\n` +
+                        `Голосов найдено: ${voices.length}\n` +
+                        `Сообщение: ${ev.message || 'нет описания'}`
+                    );
                     if (typeof origErr === 'function') origErr.call(this, ev);
                 };
 
-                // Нативный мгновенный запуск речи
                 nativeSpeak(utterance);
                 try { window.speechSynthesis.resume(); } catch (e) {}
             };
