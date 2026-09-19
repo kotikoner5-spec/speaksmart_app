@@ -132,6 +132,15 @@ const TMABridge = (function () {
                 });
             }
         };
+    } else if (typeof window !== 'undefined' && window.speechSynthesis) {
+        // ДЛЯ IPHONE И ПК: перехватываем нативный speak и срезаем скобки [ ], чтобы Siri не читала "bracket"
+        const originalNativeSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+        window.speechSynthesis.speak = function(utterance) {
+            if (utterance && utterance.text) {
+                utterance.text = utterance.text.replace(/[\[\](){}<>\/]/g, ' ').replace(/\s+/g, ' ').trim();
+            }
+            originalNativeSpeak(utterance);
+        };
     }
 
     // ЕДИНАЯ ОЗВУЧКА: Диагностический перехватчик Android Chromium

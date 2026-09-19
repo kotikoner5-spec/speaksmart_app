@@ -435,17 +435,25 @@
 
         function speak(text) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
-                TMABridge.speak(text, 0.85);
-            }
+            if (synth) synth.cancel();
+            // Очищаем текст от любых скобок [ ], ( ), / чтобы iPhone не читал "bracket"
+            const clean = text.replace(/[\[\](){}<>\/]/g, '').trim();
+            if (!clean) return;
+            const u = new SpeechSynthesisUtterance(clean);
+            u.lang = 'en-US';
+            u.rate = 0.85;
+            synth.speak(u);
         }
 
         function speakLetter(char, exampleWord) {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            const letterOnly = char[0];
-            if (typeof TMABridge !== 'undefined' && TMABridge.speak) {
-                TMABridge.speak(letterOnly, 0.8);
-            }
+            if (synth) synth.cancel();
+            // Берем только чистую букву без транскрипций и скобок
+            const letterOnly = char.replace(/[^a-zA-Z]/g, '')[0] || char[0];
+            const u = new SpeechSynthesisUtterance(letterOnly);
+            u.lang = 'en-US';
+            u.rate = 0.8;
+            synth.speak(u);
         }
 
 
