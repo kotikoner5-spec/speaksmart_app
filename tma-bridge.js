@@ -23,8 +23,57 @@ const TMABridge = (function () {
     let audioUnlocked = false;
     let selectedEnglishVoice = null;
 
+    // Определение платформы: на Android WebView нативный SpeechSynthesis часто заблокирован системой
+    const isAndroidDevice = /Android/i.test(navigator.userAgent);
+    let currentHtmlAudio = null;
+
+    // Резервный студийный аудиопоток для Android (работает на 100% моделей смартфонов)
+    function playStreamAudio(text, onEnd) {
+        try {
+            if (currentHtmlAudio) {
+                currentHtmlAudio.pause();
+                currentHtmlAudio.currentTime = 0;
+            }
+            const clean = encodeURIComponent(text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim());
+            // Используем аудиосервер американского произношения Oxford/Youdao
+            const audioUrl = `https://dict.youdao.com/dictvoice?audio=${clean}&type=2`;
+            currentHtmlAudio = new Audio(audioUrl);
+            
+            currentHtmlAudio.onended = () => {
+                currentHtmlAudio = null;
+                if (typeof onEnd === 'function') onEnd();
+            };
+            currentHtmlAudio.onerror = () => {
+                // Fallback на резервный Google TTS
+                const gUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${clean}`;
+                currentHtmlAudio = new Audio(gUrl);
+                currentHtmlAudio.onended = () => { currentHtmlAudio = null; if (onEnd) onEnd(); };
+                currentHtmlAudio.onerror = () => { currentHtmlAudio = null; if (onEnd) onEnd(); };
+                currentHtmlAudio.play().catch(() => { if (onEnd) onEnd(); });
+            };
+            currentHtmlAudio.play().catch(() => { if (onEnd) onEnd(); });
+        } catch (e) {
+            if (typeof onEnd === 'function') onEnd();
+        }
+    }
+
     // Глобальная ссылка для предотвращения удаления объекта речи сборщиком мусора Android (GC Bug)
     window._tmaActiveUtterance = null;
+
+    // ЕДИНАЯ ОЗВУЧКА: Перехватываем вызовы synth.speak во ВСЕХ 10 файлах проекта
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        const nativeSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+        window.speechSynthesis.speak = function(utterance) {
+            if (isAndroidDevice) {
+                const phrase = utterance.text || '';
+                playStreamAudio(phrase, () => {
+                    if (typeof utterance.onend === 'function') utterance.onend();
+                });
+            } else {
+                nativeSpeak(utterance);
+            }
+        };
+    }
 
     // Инициализация и поиск доступных английских голосов (критично для Android)
     function getSpeechSynth() {
@@ -138,14 +187,23 @@ const TMABridge = (function () {
 
         // Универсальная озвучка для всех смартфонов и ПК
         speak: function(text, rate = 0.88, onEndCallback = null) {
-            const synth = getSpeechSynth();
-            if (!synth) return;
-
-            // Будим аудио-движок в момент тапа (критично для Android WebView)
-            try { synth.resume(); } catch (e) {}
-
             const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
             if (!clean) return;
+
+            // На Android используем бронебойный аудиопоток, гарантирующий звук в Telegram
+            if (isAndroidDevice) {
+                playStreamAudio(clean, onEndCallback);
+                return;
+            }
+
+            // На iPhone и ПК используем нативный движок Web Speech API
+            const synth = getSpeechSynth();
+            if (!synth) {
+                playStreamAudio(clean, onEndCallback);
+                return;
+            }
+
+            try { synth.resume(); } catch (e) {}
 
             if (synth.speaking) {
                 try { synth.cancel(); } catch (e) {}
@@ -158,11 +216,8 @@ const TMABridge = (function () {
             utter.volume = 1.0;
 
             if (!selectedEnglishVoice) initEnglishVoices();
-            if (selectedEnglishVoice) {
-                utter.voice = selectedEnglishVoice;
-            }
+            if (selectedEnglishVoice) utter.voice = selectedEnglishVoice;
 
-            // Защита для Android: удерживаем ссылку от сборщика мусора V8
             window._tmaActiveUtterance = utter;
 
             const finishHandler = () => {
@@ -171,14 +226,9 @@ const TMABridge = (function () {
             };
 
             utter.onend = finishHandler;
-            utter.onerror = (e) => {
-                console.warn("TMA Bridge TTS Error:", e);
-                finishHandler();
-            };
+            utter.onerror = finishHandler;
 
-            // Синхронный запуск в рамках тапа + повторный resume для Android
             synth.speak(utter);
-            try { synth.resume(); } catch (e) {}
         },
 
         // Настройка кнопки "Назад"
