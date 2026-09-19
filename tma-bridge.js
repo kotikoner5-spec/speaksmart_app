@@ -25,33 +25,60 @@ const TMABridge = (function () {
 
     // Определение платформы: на Android WebView нативный SpeechSynthesis часто заблокирован системой
     const isAndroidDevice = /Android/i.test(navigator.userAgent);
-    let currentHtmlAudio = null;
+    
+    // Единый переиспользуемый аудио-элемент для Android (убирает задержку создания)
+    let sharedAndroidAudio = null;
 
-    // Резервный студийный аудиопоток для Android (работает на 100% моделей смартфонов)
+    function getAndroidAudio() {
+        if (!sharedAndroidAudio) {
+            sharedAndroidAudio = new Audio();
+        }
+        return sharedAndroidAudio;
+    }
+
+    // Быстрый стриминг для Android с разделением на слова и целые фразы
     function playStreamAudio(text, onEnd) {
         try {
-            if (currentHtmlAudio) {
-                currentHtmlAudio.pause();
-                currentHtmlAudio.currentTime = 0;
+            const cleanText = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
+            if (!cleanText) {
+                if (typeof onEnd === 'function') onEnd();
+                return;
             }
-            const clean = encodeURIComponent(text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim());
-            // Используем аудиосервер американского произношения Oxford/Youdao
-            const audioUrl = `https://dict.youdao.com/dictvoice?audio=${clean}&type=2`;
-            currentHtmlAudio = new Audio(audioUrl);
+
+            const audio = getAndroidAudio();
             
-            currentHtmlAudio.onended = () => {
-                currentHtmlAudio = null;
+            // Мгновенно обрываем предыдущий звук без зависания
+            audio.pause();
+            audio.currentTime = 0;
+
+            const cleanEncoded = encodeURIComponent(cleanText);
+
+            // УМНЫЙ РОУТЕР:
+            // Если фраза из нескольких слов или длинная — используем мгновенный Google TTS без лимита слов
+            // Если отдельное слово — берем студийное произношение Oxford
+            if (cleanText.includes(' ') || cleanText.length > 15) {
+                audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${cleanEncoded}`;
+            } else {
+                audio.src = `https://dict.youdao.com/dictvoice?audio=${cleanEncoded}&type=2`;
+            }
+
+            audio.onended = () => {
                 if (typeof onEnd === 'function') onEnd();
             };
-            currentHtmlAudio.onerror = () => {
-                // Fallback на резервный Google TTS
-                const gUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${clean}`;
-                currentHtmlAudio = new Audio(gUrl);
-                currentHtmlAudio.onended = () => { currentHtmlAudio = null; if (onEnd) onEnd(); };
-                currentHtmlAudio.onerror = () => { currentHtmlAudio = null; if (onEnd) onEnd(); };
-                currentHtmlAudio.play().catch(() => { if (onEnd) onEnd(); });
+
+            audio.onerror = () => {
+                // Запасной канал при сбое сети
+                audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${cleanEncoded}`;
+                audio.play().catch(() => { if (typeof onEnd === 'function') onEnd(); });
             };
-            currentHtmlAudio.play().catch(() => { if (onEnd) onEnd(); });
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch((e) => {
+                    console.warn("Audio playback notice:", e);
+                    if (typeof onEnd === 'function') onEnd();
+                });
+            }
         } catch (e) {
             if (typeof onEnd === 'function') onEnd();
         }
@@ -75,21 +102,19 @@ const TMABridge = (function () {
         };
     }
 
-    // Инициализация и поиск доступных английских голосов (критично для Android)
+    // Инициализация и поиск доступных английских голосов (для iPhone и ПК)
     function getSpeechSynth() {
         return window.speechSynthesis || null;
     }
 
-    // Инициализация и поиск доступных английских голосов (с поддержкой Android Chromium)
     function initEnglishVoices() {
+        if (isAndroidDevice) return; // На Android не тратим ресурсы на поиск неработающих голосов
         const synth = getSpeechSynth();
         if (!synth) return;
         const voices = synth.getVoices();
         if (!voices || voices.length === 0) return;
 
-        // Ищем голос: приоритет Google US English (Android), затем любой US, затем любой English
-        selectedEnglishVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en-US')) ||
-                               voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && !v.localService) ||
+        selectedEnglishVoice = voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && !v.localService) ||
                                voices.find(v => v.lang === 'en-US' || v.lang === 'en_US') ||
                                voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB') ||
                                voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en')) ||
@@ -97,18 +122,26 @@ const TMABridge = (function () {
     }
 
     const sysSynth = getSpeechSynth();
-    if (sysSynth) {
+    if (sysSynth && !isAndroidDevice) {
         sysSynth.onvoiceschanged = initEnglishVoices;
-        // Принудительный вызов для Android, где событие onvoiceschanged может зависнуть
         setTimeout(initEnglishVoices, 100);
     }
 
-    // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS И ANDROID
+    // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS И ANDROID (Включая автоозвучку диалогов)
     function unlockAudio() {
-        const synth = getSpeechSynth();
-        if (!synth) return;
-        try { synth.resume(); } catch (e) {}
-        initEnglishVoices();
+        if (isAndroidDevice) {
+            // Разблокируем Autoplay для входящих сообщений в meng.html (беззвучный микро-импульс)
+            try {
+                const a = getAndroidAudio();
+                a.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+                a.play().then(() => { a.pause(); }).catch(() => {});
+            } catch (e) {}
+        } else {
+            const synth = getSpeechSynth();
+            if (!synth) return;
+            try { synth.resume(); } catch (e) {}
+            initEnglishVoices();
+        }
         audioUnlocked = true;
         
         document.removeEventListener('touchstart', unlockAudio);
