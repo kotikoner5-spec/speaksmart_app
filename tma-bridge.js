@@ -28,9 +28,6 @@ const TMABridge = (function () {
 
     // Инициализация и поиск доступных английских голосов (критично для Android)
     function getSpeechSynth() {
-        try {
-            if (window.top && window.top.speechSynthesis) return window.top.speechSynthesis;
-        } catch (e) {}
         return window.speechSynthesis || null;
     }
 
@@ -41,7 +38,9 @@ const TMABridge = (function () {
         const voices = synth.getVoices();
         if (!voices || voices.length === 0) return;
 
-        selectedEnglishVoice = voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && !v.localService) ||
+        // Ищем голос: приоритет Google US English (Android), затем любой US, затем любой English
+        selectedEnglishVoice = voices.find(v => v.name.includes('Google') && v.lang.includes('en-US')) ||
+                               voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && !v.localService) ||
                                voices.find(v => v.lang === 'en-US' || v.lang === 'en_US') ||
                                voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB') ||
                                voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en')) ||
@@ -51,7 +50,8 @@ const TMABridge = (function () {
     const sysSynth = getSpeechSynth();
     if (sysSynth) {
         sysSynth.onvoiceschanged = initEnglishVoices;
-        initEnglishVoices();
+        // Принудительный вызов для Android, где событие onvoiceschanged может зависнуть
+        setTimeout(initEnglishVoices, 100);
     }
 
     // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS И ANDROID
@@ -141,32 +141,30 @@ const TMABridge = (function () {
             const synth = getSpeechSynth();
             if (!synth) return;
 
-            try { synth.resume(); } catch (e) {}
-
             const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
             if (!clean) return;
 
-            // На Android отменяем речь только если воспроизведение уже идет
+            // На Android WebView вызов cancel() когда речь не идет может намертво сломать движок
             if (synth.speaking || synth.pending) {
                 synth.cancel();
             }
 
-            // Задержка 45 мс необходима Android Chromium для инициализации аудиопотока после cancel
-            setTimeout(() => {
-                try { synth.resume(); } catch (e) {}
+            // Android fallback: если голоса еще не загрузились, пробуем загрузить прямо перед речью
+            if (!selectedEnglishVoice) initEnglishVoices();
 
+            // Задержка 50 мс для очистки буфера Android после cancel()
+            setTimeout(() => {
                 const utter = new SpeechSynthesisUtterance(clean);
                 utter.lang = 'en-US';
                 utter.rate = rate;
                 utter.pitch = 1.0;
                 utter.volume = 1.0;
 
-                if (!selectedEnglishVoice) initEnglishVoices();
                 if (selectedEnglishVoice) {
                     utter.voice = selectedEnglishVoice;
                 }
 
-                // Защита для Android: сохраняем в window, чтобы V8 GC не уничтожил объект до окончания речи
+                // Защита для Android: сохраняем в window, чтобы V8 GC не уничтожил объект
                 window._tmaActiveUtterance = utter;
 
                 const finishHandler = () => {
@@ -175,10 +173,13 @@ const TMABridge = (function () {
                 };
 
                 utter.onend = finishHandler;
-                utter.onerror = finishHandler;
+                utter.onerror = (e) => {
+                    console.warn("TMA Bridge TTS Error:", e);
+                    finishHandler();
+                };
 
                 synth.speak(utter);
-            }, 45);
+            }, 50);
         },
 
         // Настройка кнопки "Назад"

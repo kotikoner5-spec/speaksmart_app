@@ -40,53 +40,52 @@
         <!-- Top Header -->
         <div class="header" style="position: relative; padding: 12px 0; border-bottom: 1px solid var(--card-border); background: transparent; backdrop-filter: none;">
             <div style="font-size: 1.25rem; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 8px; letter-spacing: -0.02em;">
-                ⚡ C1-C2 ACCELERATOR
+                ⚡ ACCELERATOR
             </div>
-            <div style="background: var(--gold-bg); border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 4px;">
-                🔥 День 1
+            <div id="streakBadge" style="background: var(--gold-bg); border: 1px solid var(--gold); color: var(--gold); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: flex; align-items: center; gap: 4px; box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);">
+                🔥 0 дней
             </div>
         </div>
 
-        <!-- Hero Card -->
-        <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);">
-            <div style="font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 6px; position: relative; z-index: 2;">Инженерная система языка</div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; max-width: 600px; position: relative; z-index: 2;">
-                Полная экосистема из 10 интерактивных модулей: от нулевого алфавита и жестких скелетов синтаксиса до риторики уровня TED Talks, 228 письменных заданий и 30 живых переписок.
+        <!-- Value Proposition (Ценность) -->
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 0.9rem; font-weight: 800; color: #60a5fa;">🚀 Ваша нейросеть английского</div>
+            <div style="font-size: 0.78rem; color: #cbd5e1; line-height: 1.4;">
+                Вы пройдете путь от <b>A0 до C2</b>. Внутри: словарь Оксфорда, 228 заданий на мышечную память и 30 живых чатов. Следуйте плану ниже.
             </div>
+        </div>
+
+        <!-- Strict Learning Path (Ступени) -->
+        <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid var(--primary); border-radius: 20px; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; position: relative; z-index: 2;">
+                <div style="font-size: 1.15rem; font-weight: 900; color: #fff;" id="stageTitle">🎯 Ступень 1: Старт</div>
+                <span id="dailyProgressText" style="font-size: 0.8rem; color: var(--primary); font-weight: 800; background: var(--primary-bg); padding: 4px 10px; border-radius: 12px;">0 / 3</span>
+            </div>
+            
+            <div style="height: 6px; background: #0f172a; border-radius: 3px; overflow: hidden; margin-bottom: 16px; position: relative; z-index: 2;">
+                <div id="dailyFill" style="height: 100%; width: 0%; background: var(--primary); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+            </div>
+
+            <div id="dailyTasksContainer" style="display: flex; flex-direction: column; gap: 10px; position: relative; z-index: 2;">
+                <!-- Задачи генерируются через JS -->
+            </div>
+            
             <!-- Декоративный блик -->
             <div style="position: absolute; top: -50%; right: -20%; width: 250px; height: 250px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
         </div>
 
-        <!-- Daily Habit Checklist -->
-        <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 0.95rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px;">🎯 План тренировки на сегодня:</div>
-                <span id="habitProgressText" style="font-size: 0.75rem; color: var(--pos); font-weight: 700;">0 / 4 выполнено</span>
-            </div>
-            <div style="height: 6px; background: #1f2937; border-radius: 3px; overflow: hidden;">
-                <div id="habitFill" style="height: 100%; width: 0%; background: var(--pos); transition: width 0.3s ease;"></div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
-                <button id="h1" onclick="toggleHabit(1)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
-                    <span id="h1_icon">⬜</span> 1. Словарь Oxford
-                </button>
-                <button id="h2" onclick="toggleHabit(2)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
-                    <span id="h2_icon">⬜</span> 2. Каркас синтаксиса
-                </button>
-                <button id="h3" onclick="toggleHabit(3)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
-                    <span id="h3_icon">⬜</span> 3. Тренажер письма
-                </button>
-                <button id="h4" onclick="toggleHabit(4)" style="background: #111827; border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: left; transition: all 0.15s;">
-                    <span id="h4_icon">⬜</span> 4. Живые диалоги
-                </button>
-            </div>
+        <!-- Scroll Hint -->
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 10px 0; opacity: 0.7; animation: bounce 2s infinite;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Библиотека модулей</div>
+            <div style="font-size: 1.2rem; color: var(--text-muted);">↓</div>
         </div>
+        <style>@keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(5px); } 60% { transform: translateY(3px); } }</style>
 
         <!-- 1. ПРАКТИКА И ТРЕНАЖЕРЫ -->
-        <div class="section-title">⚡ Главные тренажеры автоматизма:</div>
+        <div class="section-title">⚡ Интерактивная практика:</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('meng.html', 'Живые диалоги')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'meng.html', 'Живые диалоги')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--cyan-bg); color: var(--cyan);">Интерактив</span>
                     <span style="font-size: 1.8rem; line-height: 1;">💬</span>
@@ -101,7 +100,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('reng.html', 'Тренажер письма')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'reng.html', 'Тренажер письма')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--gold-bg); color: var(--gold);">Практика</span>
                     <span style="font-size: 1.8rem; line-height: 1;">✍️</span>
@@ -116,7 +115,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('weng.html', 'Словарь Oxford 10k')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'weng.html', 'Словарь Oxford 10k')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--pos-bg); color: var(--pos);">База слов</span>
                     <span style="font-size: 1.8rem; line-height: 1;">📚</span>
@@ -137,7 +136,7 @@
         <div class="section-title">🌱 Фундамент и Скелеты (A0–B1):</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('heng.html', 'Фонетика и база')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'heng.html', 'Фонетика и база')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--pos-bg); color: var(--pos);">Старт с нуля</span>
                     <span style="font-size: 1.8rem; line-height: 1;">📘</span>
@@ -152,7 +151,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng.html', 'Синтаксис A1-A2')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'eng.html', 'Синтаксис A1-A2')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--primary-bg); color: var(--primary);">Скелеты</span>
                     <span style="font-size: 1.8rem; line-height: 1;">📐</span>
@@ -167,7 +166,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng1.html', 'Лексикон и предлоги')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'eng1.html', 'Лексикон и предлоги')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--primary-bg); color: var(--primary);">Топливо</span>
                     <span style="font-size: 1.8rem; line-height: 1;">⛽</span>
@@ -182,7 +181,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng2.html', 'Разговорная беглость')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'eng2.html', 'Разговорная беглость')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--gold-bg); color: var(--gold);">Беглость</span>
                     <span style="font-size: 1.8rem; line-height: 1;">⚡</span>
@@ -203,7 +202,7 @@
         <div class="section-title">👑 Прорыв в C1–C2 (Продвинутый уровень):</div>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px;">
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng3.html', 'Язык дипломатии')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'eng3.html', 'Язык дипломатии')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--purple-bg); color: var(--purple);">B2–C1</span>
                     <span style="font-size: 1.8rem; line-height: 1;">💎</span>
@@ -218,7 +217,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng4.html', 'Мастерство синтаксиса')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'eng4.html', 'Мастерство синтаксиса')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--purple-bg); color: var(--purple);">B2</span>
                     <span style="font-size: 1.8rem; line-height: 1;">🎯</span>
@@ -233,7 +232,7 @@
                 </div>
             </div>
 
-            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule('eng5.html', 'Риторика C1-C2')">
+            <div class="card" style="cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; padding: 16px;" onclick="openModule(null, 'eng5.html', 'Риторика C1-C2')">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <span style="font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; background: var(--rose-bg); color: var(--rose);">C1–C2 Master</span>
                     <span style="font-size: 1.8rem; line-height: 1;">👑</span>
@@ -265,29 +264,1236 @@
 
     <script>
         let currentLoadedUrl = '';
+        let activeTask = null; 
+        let taskStartTime = 0;
+        let currentTaskRemainingMs = 0;
+        let cooldownInterval = null;
+
+        const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 часа в миллисекундах
+
+        // ========================================================================
+        // СИСТЕМА ОБУЧЕНИЯ НА 200 ДНЕЙ
+        // ========================================================================
+        const LEARNING_PATH = [
+            { title: "День 1: Введение и База", tasks: [
+                { id: 'd1_1', title: 'Букварь и фонетика', url: 'heng.html', icon: '📘', time: 10 },
+                { id: 'd1_2', title: 'Словарь: Изучить 15 слов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd1_3', title: 'Тренажер письма (База)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 2: Каркас предложений", tasks: [
+                { id: 'd2_1', title: 'Синтаксис A1-A2', url: 'eng.html', icon: '📐', time: 15 },
+                { id: 'd2_2', title: 'Диалог: Аренда квартиры', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd2_3', title: 'Словарь: Повторение', url: 'weng.html', icon: '📚', time: 10 }
+            ]},
+            { title: "День 3: Связки и Предлоги", tasks: [
+                { id: 'd3_1', title: 'Предлоги времени и места', url: 'eng1.html', icon: '⛽', time: 15 },
+                { id: 'd3_2', title: 'Тренажер письма (Скелеты)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd3_3', title: 'Диалог: Маркетплейс', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 4: Разговорная беглость", tasks: [
+                { id: 'd4_1', title: 'Фразовые глаголы', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd4_2', title: 'Словарь: Глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd4_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 5: Погружение в B2", tasks: [
+                { id: 'd5_1', title: 'Мастерство синтаксиса', url: 'eng4.html', icon: '🎯', time: 20 },
+                { id: 'd5_2', title: 'Тренажер письма (B1-B2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd5_3', title: 'Диалог: Отель', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+			{ title: "День 6: Закрепление базы и Возврат", tasks: [
+                { id: 'd6_1', title: 'Глаголы: Быт и Действие', url: 'eng1.html', icon: '⛽', time: 15 },
+                { id: 'd6_2', title: 'Диалог: Возврат в магазине', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd6_3', title: 'Тренажер письма (A2-B1)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 7: Аудирование и Заполнители", tasks: [
+                { id: 'd7_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd7_2', title: 'Словарь: Уровень B1', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd7_3', title: 'Фонетика: Битва W и V', url: 'heng.html', icon: '📘', time: 10 }
+            ]},
+            { title: "День 8: Условия и Автопрокат", tasks: [
+                { id: 'd8_1', title: 'Сожаления (I wish / If only)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd8_2', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd8_3', title: 'Тренажер письма (B2)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 9: Глагольные связки", tasks: [
+                { id: 'd9_1', title: 'Матрица DO vs MAKE', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd9_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd9_3', title: 'Диалог: Блок карты в банке', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 10: Рубеж B2 (Мастерство)", tasks: [
+                { id: 'd10_1', title: 'Вопросы с хвостиком (Tags)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd10_2', title: 'Тренажер письма (Микс B2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd10_3', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 11: Введение в Дипломатию C1", tasks: [
+                { id: 'd11_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 20 },
+                { id: 'd11_2', title: 'Диалог: Ресторан и аллергия', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd11_3', title: 'Тренажер письма (Пассив)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 12: Медицина и Детали", tasks: [
+                { id: 'd12_1', title: 'Словарь: Уровень B2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd12_2', title: 'Связки: Причина и следствие', url: 'eng1.html', icon: '⛽', time: 15 },
+                { id: 'd12_3', title: 'Диалог: Визит к врачу', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 13: Делегирование и Аэропорт", tasks: [
+                { id: 'd13_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd13_2', title: 'Диалог: Потерянный багаж', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd13_3', title: 'Тренажер письма (C1 Старт)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 14: Беглость и Фитнес", tasks: [
+                { id: 'd14_1', title: 'Фразовые глаголы (Часть 2)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd14_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd14_3', title: 'Диалог: Фитнес-клуб', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 15: Ораторское искусство", tasks: [
+                { id: 'd15_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 20 },
+                { id: 'd15_2', title: 'Тренажер письма (Инверсия)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd15_3', title: 'Словарь: Уровень C1', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 16: Карьера и Фокус", tasks: [
+                { id: 'd16_1', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd16_2', title: 'Фокус сути (Cleft Sentences)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd16_3', title: 'Тренажер письма (B2-C1)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 17: Технологии и Идиомы", tasks: [
+                { id: 'd17_1', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd17_2', title: 'Естественные реакции', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd17_3', title: 'Словарь: Продвинутые идиомы', url: 'weng.html', icon: '📚', time: 20 }
+            ]},
+            { title: "День 18: Дедукция и Логика", tasks: [
+                { id: 'd18_1', title: 'Гипотезы в прошлом (Modals)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd18_2', title: 'Диалог: Такси и навигация', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd18_3', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 19: Введение в C2 (Номинализация)", tasks: [
+                { id: 'd19_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd19_2', title: 'Словарь: Уровень C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd19_3', title: 'Диалог: Заказ в кофейне', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 20: Архитектура монолога", tasks: [
+                { id: 'd20_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd20_2', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd20_3', title: 'Диалог: Химчистка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 21: Сравнения и Доставка", tasks: [
+                { id: 'd21_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd21_2', title: 'Диалог: Курьер и доставка', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd21_3', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 22: Протоколы и Экстренные ситуации", tasks: [
+                { id: 'd22_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 20 },
+                { id: 'd22_2', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd22_3', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 23: Бизнес и Эллипсис", tasks: [
+                { id: 'd23_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd23_2', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd23_3', title: 'Словарь: Бизнес-идиомы', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 24: Конфликты и Коннекторы", tasks: [
+                { id: 'd24_1', title: 'Коннекторы для дебатов', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd24_2', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd24_3', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 25 }
+            ]},
+            { title: "День 25: Стилистика и Быт", tasks: [
+                { id: 'd25_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd25_2', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd25_3', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 20 }
+            ]},
+            { title: "День 26: Пересказ и Авиация", tasks: [
+                { id: 'd26_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd26_2', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd26_3', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 27: Биномы и Медицина", tasks: [
+                { id: 'd27_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd27_2', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd27_3', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 28: Относительные местоимения", tasks: [
+                { id: 'd28_1', title: 'Связки Whose / Which / Whom', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd28_2', title: 'Диалог: Книжный магазин', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd28_3', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 }
+            ]},
+            { title: "День 29: Тонкое преуменьшение", tasks: [
+                { id: 'd29_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd29_2', title: 'Диалог: Служба поддержки', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd29_3', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 30: Полиция и Формальности", tasks: [
+                { id: 'd30_1', title: 'Инверсия (Повторение)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd30_2', title: 'Диалог: Заявление в полицию', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd30_3', title: 'Тренажер письма (C2 Максимум)', url: 'reng.html', icon: '✍️', time: 25 }
+            ]},
+            { title: "День 31: ДТП и Страховая", tasks: [
+                { id: 'd31_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd31_2', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 },
+                { id: 'd31_3', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 32: Ремонт и Структура", tasks: [
+                { id: 'd32_1', title: 'Архитектура монолога (Повтор)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd32_2', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd32_3', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 }
+            ]},
+            { title: "День 33: Детейлинг и Рутина", tasks: [
+                { id: 'd33_1', title: 'Матрица DO vs MAKE (Повтор)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd33_2', title: 'Диалог: Автомойка', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd33_3', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 34: Индивидуальные заказы", tasks: [
+                { id: 'd34_1', title: 'Бизнес-идиомы топ-менеджмента', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd34_2', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd34_3', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 20 }
+            ]},
+            { title: "День 35: Абсолютный контроль C2", tasks: [
+                { id: 'd35_1', title: 'Номинализация (Финальный тест)', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd35_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd35_3', title: 'Тренажер письма (Финальный Босс)', url: 'reng.html', icon: '✍️', time: 30 }
+            ]},
+			{ title: "День 36: Скорость и Фразовые глаголы", tasks: [
+                { id: 'd36_1', title: 'Фразовые глаголы (Повтор)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd36_2', title: 'Диалог: Аренда (Без подсказок)', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd36_3', title: 'Словарь: Идиомы B2-C1', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 37: Нереальное прошлое", tasks: [
+                { id: 'd37_1', title: 'Сожаления (I wish / If only)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd37_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd37_3', title: 'Диалог: Маркетплейс (Скорость)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 38: Делегирование задач", tasks: [
+                { id: 'd38_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd88_2', title: 'Словарь: Академический C1', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd38_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 39: Фокус на главном", tasks: [
+                { id: 'd39_1', title: 'Cleft Sentences (Фокус сути)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd39_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd39_3', title: 'Фонетика: Теневой повтор', url: 'heng.html', icon: '📘', time: 10 }
+            ]},
+            { title: "День 40: Высший пилотаж C2", tasks: [
+                { id: 'd40_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd40_2', title: 'Диалог: Ресепшн отеля', url: 'meng.html', icon: '💬', time: 10 },
+                { id: 'd40_3', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 }
+            ]},
+            { title: "День 41: Рутина и Ошибки", tasks: [
+                { id: 'd41_1', title: 'Матрица DO vs MAKE', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd41_2', title: 'Тренажер письма (Микс)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd41_3', title: 'Диалог: Возврат в магазине', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 42: Ораторская Инверсия", tasks: [
+                { id: 'd42_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd42_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd42_3', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 43: Связность речи", tasks: [
+                { id: 'd43_1', title: 'Коннекторы для дебатов', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd43_2', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd43_3', title: 'Диалог: Блок карты в банке', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 44: Пересказ событий", tasks: [
+                { id: 'd44_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd44_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd44_3', title: 'Диалог: Ресторан и аллергия', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 45: Протоколы и Требования", tasks: [
+                { id: 'd45_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd45_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd45_3', title: 'Диалог: Визит к врачу', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 46: Пропорции и Сравнения", tasks: [
+                { id: 'd46_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd46_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd46_3', title: 'Диалог: Потерянный багаж', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 47: Сжатие текста", tasks: [
+                { id: 'd47_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd47_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd47_3', title: 'Диалог: Фитнес-клуб', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 48: Язык Дипломатии", tasks: [
+                { id: 'd48_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd48_2', title: 'Словарь: Бизнес-лексика', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd48_3', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 49: Деепричастия", tasks: [
+                { id: 'd49_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd49_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd49_3', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 50: Корпоративные Идиомы", tasks: [
+                { id: 'd50_1', title: 'Бизнес-идиомы топ-менеджмента', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd50_2', title: 'Словарь: Уровень C1', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd50_3', title: 'Диалог: Такси и навигация', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 51: Живой диалог", tasks: [
+                { id: 'd51_1', title: 'Вопросы с хвостиком (Tags)', url: 'eng4.html', icon: '🎯', time: 10 },
+                { id: 'd51_2', title: 'Тренажер письма (B2-C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd51_3', title: 'Диалог: Заказ в кофейне', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 52: Стилистический акцент", tasks: [
+                { id: 'd52_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd52_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd52_3', title: 'Диалог: Химчистка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 53: Логика и Дедукция", tasks: [
+                { id: 'd53_1', title: 'Гипотезы в прошлом (Modals)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd53_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd53_3', title: 'Диалог: Курьер и доставка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 54: Относительные связи", tasks: [
+                { id: 'd54_1', title: 'Связки Whose / Which / Whom', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd54_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd54_3', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 55: Тонкое преуменьшение", tasks: [
+                { id: 'd55_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd55_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd55_3', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 56: Английские Биномы", tasks: [
+                { id: 'd56_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd56_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd56_3', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 57: Архитектура Монолога", tasks: [
+                { id: 'd57_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd57_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd57_3', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 58: Смешанные условия", tasks: [
+                { id: 'd58_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd58_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd58_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 59: Паузы и Филлеры", tasks: [
+                { id: 'd59_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd59_2', title: 'Тренажер письма (Микс)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd59_3', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 60: Сложный Пассив", tasks: [
+                { id: 'd60_1', title: 'Сложный пассив (Rumored to)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd60_2', title: 'Словарь: Уровень C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd60_3', title: 'Диалог: Книжный магазин', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 61: Привычки и Адаптация", tasks: [
+                { id: 'd61_1', title: 'Три лица USED TO', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd61_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd61_3', title: 'Диалог: Служба поддержки', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 62: Инверсия Максимум", tasks: [
+                { id: 'd62_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd62_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd62_3', title: 'Диалог: Заявление в полицию', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 63: Номинализация Максимум", tasks: [
+                { id: 'd63_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd63_2', title: 'Тренажер письма (C2 Максимум)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd63_3', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 64: Бизнес Максимум", tasks: [
+                { id: 'd64_1', title: 'Бизнес-идиомы топ-менеджмента', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd64_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd64_3', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 65: Гранд-Финал C2", tasks: [
+                { id: 'd65_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd65_2', title: 'Тренажер письма (Финальный Босс)', url: 'reng.html', icon: '✍️', time: 30 },
+                { id: 'd65_3', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+			{ title: "День 66: Фокус сути на скорость", tasks: [
+                { id: 'd66_1', title: 'Cleft Sentences (Фокус)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd66_2', title: 'Тренажер письма (Слепая печать)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd66_3', title: 'Диалог: Аренда (На скорость)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 67: Идиоматика и Торг", tasks: [
+                { id: 'd67_1', title: 'Фразовые глаголы (Микс)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd67_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd67_3', title: 'Диалог: Маркетплейс (Торг)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 68: Дипломатия в стрессе", tasks: [
+                { id: 'd68_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd68_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd68_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 69: Биномы и Сервис", tasks: [
+                { id: 'd69_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd69_2', title: 'Словарь: Академический C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd69_3', title: 'Диалог: Ресепшн отеля', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 70: Сжатие и Возвраты", tasks: [
+                { id: 'd70_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd70_2', title: 'Тренажер письма (Микс)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd70_3', title: 'Диалог: Возврат в магазине', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 71: Ораторская Инверсия", tasks: [
+                { id: 'd71_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd71_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd71_3', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 72: Выступление TED", tasks: [
+                { id: 'd72_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd72_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd72_3', title: 'Диалог: Блок карты в банке', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 73: Заполнители пауз", tasks: [
+                { id: 'd73_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd73_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd73_3', title: 'Диалог: Ресторан и аллергия', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 74: Пропорции и Медицина", tasks: [
+                { id: 'd74_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd74_2', title: 'Тренажер письма (B2-C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd74_3', title: 'Диалог: Визит к врачу', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 75: Делегирование задач", tasks: [
+                { id: 'd75_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd75_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd75_3', title: 'Диалог: Потерянный багаж', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 76: Тонкое преуменьшение", tasks: [
+                { id: 'd76_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd76_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd76_3', title: 'Диалог: Фитнес-клуб', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 77: Пересказ и HR", tasks: [
+                { id: 'd77_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd77_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd77_3', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 78: Протоколы и Провайдеры", tasks: [
+                { id: 'd78_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd78_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd78_3', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 79: Рутина DO vs MAKE", tasks: [
+                { id: 'd79_1', title: 'Матрица DO vs MAKE', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd79_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd79_3', title: 'Диалог: Такси и навигация', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 80: Стилистический фронтинг", tasks: [
+                { id: 'd80_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd80_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd80_3', title: 'Диалог: Заказ в кофейне', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 81: Сожаления и Быт", tasks: [
+                { id: 'd81_1', title: 'Сожаления (I wish / If only)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd81_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd81_3', title: 'Диалог: Химчистка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 82: Дедукция и Доставка", tasks: [
+                { id: 'd82_1', title: 'Гипотезы в прошлом (Modals)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd82_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd82_3', title: 'Диалог: Курьер и доставка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 83: Эллипсис и Животные", tasks: [
+                { id: 'd83_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd83_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd83_3', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 84: Привычки и Коворкинг", tasks: [
+                { id: 'd84_1', title: 'Три лица USED TO', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd84_2', title: 'Тренажер письма (Микс)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd84_3', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 85: Смешанные условия", tasks: [
+                { id: 'd85_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd85_2', title: 'Словарь: Глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd85_3', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 86: Герундий и Барбершоп", tasks: [
+                { id: 'd86_1', title: 'Связка: Глагол + ING', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd86_2', title: 'Тренажер письма (B2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd86_3', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 87: Номинализация и Авиация", tasks: [
+                { id: 'd87_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd87_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd87_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 88: Хвостики и Стоматолог", tasks: [
+                { id: 'd88_1', title: 'Вопросы с хвостиком (Tags)', url: 'eng4.html', icon: '🎯', time: 10 },
+                { id: 'd88_2', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd88_3', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 89: Инверсия и Книги", tasks: [
+                { id: 'd89_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd89_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd89_3', title: 'Диалог: Книжный магазин', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 90: TED Talk и Билеты", tasks: [
+                { id: 'd90_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd90_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd90_3', title: 'Диалог: Служба поддержки', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 91: Относительные связи", tasks: [
+                { id: 'd91_1', title: 'Связки Whose / Which / Whom', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd91_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd91_3', title: 'Диалог: Заявление в полицию', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 92: Дипломатия и Страховая", tasks: [
+                { id: 'd92_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd92_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd92_3', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 93: Беглость и Ремонт", tasks: [
+                { id: 'd93_1', title: 'Фразовые глаголы (Микс)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd93_2', title: 'Словарь: Уровень C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd93_3', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 94: Биномы и Автомойка", tasks: [
+                { id: 'd94_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd94_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd94_3', title: 'Диалог: Автомойка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 95: Фокус и Кондитер", tasks: [
+                { id: 'd95_1', title: 'Cleft Sentences (Фокус сути)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd95_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd95_3', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 96: Делегирование (Теневой повтор)", tasks: [
+                { id: 'd96_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd96_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd96_3', title: 'Диалог: Аренда (Импровизация)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 97: Литота и Маркетплейс", tasks: [
+                { id: 'd97_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd97_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd97_3', title: 'Диалог: Маркетплейс (Импровизация)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 98: Деепричастия и Сантехник", tasks: [
+                { id: 'd98_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd98_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd98_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 99: Заполнители и Отель", tasks: [
+                { id: 'd99_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd99_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd99_3', title: 'Диалог: Ресепшн отеля', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 100: Протоколы и Возврат", tasks: [
+                { id: 'd100_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd100_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd100_3', title: 'Диалог: Возврат в магазине', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 101: Фронтинг и Автопрокат", tasks: [
+                { id: 'd101_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd101_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd101_3', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 102: Сравнения и Банк", tasks: [
+                { id: 'd102_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd102_2', title: 'Тренажер письма (B2-C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd102_3', title: 'Диалог: Блок карты в банке', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 103: Дедукция и Ресторан", tasks: [
+                { id: 'd103_1', title: 'Гипотезы в прошлом (Modals)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd103_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd103_3', title: 'Диалог: Ресторан и аллергия', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 104: Эллипсис и Врач", tasks: [
+                { id: 'd104_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd104_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd104_3', title: 'Диалог: Визит к врачу', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 105: Рутина и Багаж", tasks: [
+                { id: 'd105_1', title: 'Матрица DO vs MAKE', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd105_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd105_3', title: 'Диалог: Потерянный багаж', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 106: Пересказ и Фитнес", tasks: [
+                { id: 'd106_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd106_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd106_3', title: 'Диалог: Фитнес-клуб', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 107: Смешанные условия и HR", tasks: [
+                { id: 'd107_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd107_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd107_3', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 108: Номинализация и Провайдер", tasks: [
+                { id: 'd108_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd108_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd108_3', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 109: Сожаления и Такси", tasks: [
+                { id: 'd109_1', title: 'Сожаления (I wish / If only)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd109_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd109_3', title: 'Диалог: Такси и навигация', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 110: Инфинитив и Кофе", tasks: [
+                { id: 'd110_1', title: 'Связка: Глагол + TO', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd110_2', title: 'Тренажер письма (Микс)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd110_3', title: 'Диалог: Заказ в кофейне', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 111: Инверсия и Химчистка", tasks: [
+                { id: 'd111_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd111_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd111_3', title: 'Диалог: Химчистка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 112: TED Talk и Курьер", tasks: [
+                { id: 'd112_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd112_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd112_3', title: 'Диалог: Курьер и доставка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 113: Привычки и Ветклиника", tasks: [
+                { id: 'd113_1', title: 'Три лица USED TO', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd113_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd113_3', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 114: Дипломатия и Коворкинг", tasks: [
+                { id: 'd114_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd114_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd114_3', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 115: Биномы и Сосед", tasks: [
+                { id: 'd115_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd115_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd115_3', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 116: Беглость и Барбершоп", tasks: [
+                { id: 'd116_1', title: 'Фразовые глаголы (Микс)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd116_2', title: 'Тренажер письма (B2-C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd116_3', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 117: Хвостики и Авиация", tasks: [
+                { id: 'd117_1', title: 'Вопросы с хвостиком (Tags)', url: 'eng4.html', icon: '🎯', time: 10 },
+                { id: 'd117_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd117_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 118: Делегирование и Стоматолог", tasks: [
+                { id: 'd118_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd118_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd118_3', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 119: Литота и Книги", tasks: [
+                { id: 'd119_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd119_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd119_3', title: 'Диалог: Книжный магазин', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 120: Относительные связи и Билеты", tasks: [
+                { id: 'd120_1', title: 'Связки Whose / Which / Whom', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd120_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd120_3', title: 'Диалог: Служба поддержки', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 121: Заполнители и Полиция", tasks: [
+                { id: 'd121_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd121_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd121_3', title: 'Диалог: Заявление в полицию', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 122: Протоколы и Страховая", tasks: [
+                { id: 'd122_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd122_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd122_3', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 123: Фронтинг и Ремонт", tasks: [
+                { id: 'd123_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd123_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd123_3', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 124: Деепричастия и Автомойка", tasks: [
+                { id: 'd124_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd124_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd124_3', title: 'Диалог: Автомойка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 125: Номинализация и Кондитер", tasks: [
+                { id: 'd125_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd125_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd125_3', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+			{ title: "День 126: Стресс-тест и Инверсия", tasks: [
+                { id: 'd126_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd126_2', title: 'Словарь: Академический C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd126_3', title: 'Диалог: Полиция (Без подсказок)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 127: Нереальное прошлое", tasks: [
+                { id: 'd127_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd127_2', title: 'Тренажер письма (Слепая печать)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd127_3', title: 'Диалог: Страховая (На скорость)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 128: Архитектура бизнеса", tasks: [
+                { id: 'd128_1', title: 'Бизнес-идиомы топ-менеджмента', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd128_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd128_3', title: 'Диалог: Собеседование HR', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 129: Идиоматика и Авиация", tasks: [
+                { id: 'd129_1', title: 'Фразовые глаголы (Микс)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd129_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd129_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 130: Высший пилотаж TED", tasks: [
+                { id: 'd130_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd130_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd130_3', title: 'Фонетика: Теневой повтор', url: 'heng.html', icon: '📘', time: 10 }
+            ]},
+            { title: "День 131: Фокус и Детали", tasks: [
+                { id: 'd131_1', title: 'Cleft Sentences (Фокус сути)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd131_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd131_3', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 132: Делегирование и Быт", tasks: [
+                { id: 'd132_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd132_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd132_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 133: Стилистика и Торг", tasks: [
+                { id: 'd133_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd133_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd133_3', title: 'Диалог: Маркетплейс (Импровизация)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 134: Сжатие и Медицина", tasks: [
+                { id: 'd134_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd134_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd134_3', title: 'Диалог: Визит к врачу', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 135: Дипломатия и Конфликты", tasks: [
+                { id: 'd135_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd135_2', title: 'Словарь: Бизнес-лексика', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd135_3', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 136: Эллипсис и Сервис", tasks: [
+                { id: 'd136_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd136_2', title: 'Тренажер письма (Микс C1-C2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd136_3', title: 'Диалог: Ресепшн отеля', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 137: Сожаления и Банк", tasks: [
+                { id: 'd137_1', title: 'Сожаления (I wish / If only)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd137_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd137_3', title: 'Диалог: Блок карты в банке', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 138: Номинализация и Заказы", tasks: [
+                { id: 'd138_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd138_2', title: 'Тренажер письма (C2 Максимум)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd138_3', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 139: Пропорции и Доставка", tasks: [
+                { id: 'd139_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd139_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd139_3', title: 'Диалог: Курьер и доставка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 140: Протоколы и Возврат", tasks: [
+                { id: 'd140_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd140_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd140_3', title: 'Диалог: Возврат в магазине', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 141: Биномы и Животные", tasks: [
+                { id: 'd141_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd141_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd141_3', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 142: Относительные связи", tasks: [
+                { id: 'd142_1', title: 'Связки Whose / Which / Whom', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd142_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd142_3', title: 'Диалог: Книжный магазин', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 143: Тонкое преуменьшение", tasks: [
+                { id: 'd143_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd143_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd143_3', title: 'Диалог: Служба поддержки', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 144: Пересказ и Коворкинг", tasks: [
+                { id: 'd144_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd144_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd144_3', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 145: Коннекторы и Провайдер", tasks: [
+                { id: 'd145_1', title: 'Коннекторы для дебатов', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd145_2', title: 'Словарь: Академический C1', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd145_3', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 146: Скоростной Синтаксис", tasks: [
+                { id: 'd146_1', title: 'Три лица USED TO', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd146_2', title: 'Тренажер письма (Слепая печать)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd146_3', title: 'Диалог: Аренда (На скорость)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 147: Дедукция и Автомойка", tasks: [
+                { id: 'd147_1', title: 'Гипотезы в прошлом (Modals)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd147_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd147_3', title: 'Диалог: Автомойка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 148: Заполнители и Барбершоп", tasks: [
+                { id: 'd148_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd148_2', title: 'Тренажер письма (Микс B2-C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd148_3', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 149: Сложный Пассив", tasks: [
+                { id: 'd149_1', title: 'Сложный пассив (Rumored to)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd149_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd149_3', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 150: Рутина DO vs MAKE", tasks: [
+                { id: 'd150_1', title: 'Матрица DO vs MAKE', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd150_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd150_3', title: 'Диалог: Заказ в кофейне', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 151: Ораторская Инверсия II", tasks: [
+                { id: 'd151_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd151_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd151_3', title: 'Диалог: Полиция (Импровизация)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 152: Архитектура TED II", tasks: [
+                { id: 'd152_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd152_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd152_3', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 153: Хвостики и Автопрокат", tasks: [
+                { id: 'd153_1', title: 'Вопросы с хвостиком (Tags)', url: 'eng4.html', icon: '🎯', time: 10 },
+                { id: 'd153_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd153_3', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 154: Бизнес-Идиомы II", tasks: [
+                { id: 'd154_1', title: 'Бизнес-идиомы топ-менеджмента', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd154_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd154_3', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 155: Смешанные условия II", tasks: [
+                { id: 'd155_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd155_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd155_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 156: Фронтинг и Сантехник", tasks: [
+                { id: 'd156_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd156_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd156_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 157: Фокус сути II", tasks: [
+                { id: 'd157_1', title: 'Cleft Sentences (Фокус сути)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd157_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd157_3', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 158: Делегирование II", tasks: [
+                { id: 'd158_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd158_2', title: 'Тренажер письма (C2 Максимум)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd158_3', title: 'Диалог: Маркетплейс (Торг)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 159: Эллипсис и Отель", tasks: [
+                { id: 'd159_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd159_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd159_3', title: 'Диалог: Ресепшн отеля', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 160: Дипломатия II", tasks: [
+                { id: 'd160_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd160_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd160_3', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 161: Деепричастия II", tasks: [
+                { id: 'd161_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd161_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd161_3', title: 'Диалог: Визит к врачу', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 162: Номинализация II", tasks: [
+                { id: 'd162_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd162_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd162_3', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 163: Пропорции II", tasks: [
+                { id: 'd163_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd163_2', title: 'Словарь: Академический C1', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd163_3', title: 'Диалог: Курьер и доставка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 164: Протоколы II", tasks: [
+                { id: 'd164_1', title: 'Сослагательное наклонение', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd164_2', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd164_3', title: 'Диалог: Возврат в магазине', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 165: Биномы II", tasks: [
+                { id: 'd165_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd165_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd165_3', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 166: Относительные связи II", tasks: [
+                { id: 'd166_1', title: 'Связки Whose / Which / Whom', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd166_2', title: 'Тренажер письма (Микс)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd166_3', title: 'Диалог: Книжный магазин', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 167: Тонкое преуменьшение II", tasks: [
+                { id: 'd167_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd167_2', title: 'Словарь: Уровень C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd167_3', title: 'Диалог: Служба поддержки', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 168: Пересказ II", tasks: [
+                { id: 'd168_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd168_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd168_3', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 169: Коннекторы II", tasks: [
+                { id: 'd169_1', title: 'Коннекторы для дебатов', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd169_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd169_3', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 170: Привычки II", tasks: [
+                { id: 'd170_1', title: 'Три лица USED TO', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd170_2', title: 'Тренажер письма (Слепая печать)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd170_3', title: 'Диалог: Аренда (На скорость)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 171: Дедукция II", tasks: [
+                { id: 'd171_1', title: 'Гипотезы в прошлом (Modals)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd171_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd171_3', title: 'Диалог: Автомойка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 172: Заполнители II", tasks: [
+                { id: 'd172_1', title: 'Слова-заполнители (Fillers)', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd172_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd172_3', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 173: Сложный Пассив II", tasks: [
+                { id: 'd173_1', title: 'Сложный пассив (Rumored to)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd173_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd173_3', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 174: Рутина DO vs MAKE II", tasks: [
+                { id: 'd174_1', title: 'Матрица DO vs MAKE', url: 'eng2.html', icon: '⚡', time: 10 },
+                { id: 'd174_2', title: 'Тренажер письма (C1)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd174_3', title: 'Диалог: Заказ в кофейне', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 175: Ораторская Инверсия III", tasks: [
+                { id: 'd175_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd175_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd175_3', title: 'Диалог: Полиция (Импровизация)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 176: Архитектура TED III", tasks: [
+                { id: 'd176_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd176_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd176_3', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 177: Хвостики II", tasks: [
+                { id: 'd177_1', title: 'Вопросы с хвостиком (Tags)', url: 'eng4.html', icon: '🎯', time: 10 },
+                { id: 'd177_2', title: 'Словарь: Академический C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd177_3', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 178: Бизнес-Идиомы III", tasks: [
+                { id: 'd178_1', title: 'Бизнес-идиомы топ-менеджмента', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd178_2', title: 'Тренажер письма (C2 Максимум)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd178_3', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 179: Смешанные условия III", tasks: [
+                { id: 'd179_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd179_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd179_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 180: Фронтинг III", tasks: [
+                { id: 'd180_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd180_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd180_3', title: 'Диалог: Вызов сантехника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 181: Фокус сути III", tasks: [
+                { id: 'd181_1', title: 'Cleft Sentences (Фокус сути)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd181_2', title: 'Словарь: Фразовые глаголы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd181_3', title: 'Диалог: Ремонт смартфона', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 182: Делегирование III", tasks: [
+                { id: 'd182_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd182_2', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd182_3', title: 'Диалог: Маркетплейс (Торг)', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 183: Эллипсис III", tasks: [
+                { id: 'd183_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd183_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd183_3', title: 'Диалог: Ресепшн отеля', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 184: Дипломатия III", tasks: [
+                { id: 'd184_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd184_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd184_3', title: 'Диалог: Шумный сосед', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 185: Гранд-Мастер C2", tasks: [
+                { id: 'd185_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd185_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd185_3', title: 'Тренажер письма (Финальный Босс)', url: 'reng.html', icon: '✍️', time: 30 }
+            ]},
+			{ title: "День 186: Фразовые глаголы C2", tasks: [
+                { id: 'd186_1', title: 'Фразовые глаголы (Микс)', url: 'eng2.html', icon: '⚡', time: 15 },
+                { id: 'd186_2', title: 'Тренажер письма (Слепая печать)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd186_3', title: 'Диалог: Собеседование (HR)', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 187: Нереальное прошлое IV", tasks: [
+                { id: 'd187_1', title: 'Смешанные условия (Mixed)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd187_2', title: 'Словарь: Академический C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd187_3', title: 'Диалог: Заявление в полицию', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 188: Фокус сути IV", tasks: [
+                { id: 'd188_1', title: 'Cleft Sentences (Фокус сути)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd188_2', title: 'Тренажер письма (C2 Максимум)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd188_3', title: 'Диалог: Страховая после ДТП', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 189: Номинализация IV", tasks: [
+                { id: 'd189_1', title: 'Номинализация (Язык C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd189_2', title: 'Словарь: Идиомы C1-C2', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd189_3', title: 'Диалог: Провайдер интернета', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 190: Дипломатия IV", tasks: [
+                { id: 'd190_1', title: 'Мягкие переговоры (Hedging)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd190_2', title: 'Тренажер письма (Протокол)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd190_3', title: 'Диалог: Блок карты в банке', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 191: Деепричастия IV", tasks: [
+                { id: 'd191_1', title: 'Деепричастные обороты', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd191_2', title: 'Словарь: 3 формы глаголов', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd191_3', title: 'Диалог: Прокат авто', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 192: Эллипсис IV", tasks: [
+                { id: 'd192_1', title: 'Эллипсис (Редукция речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd192_2', title: 'Тренажер письма (C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd192_3', title: 'Диалог: Ветклиника', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 193: Инверсия IV", tasks: [
+                { id: 'd193_1', title: 'Инверсия (Not only did we...)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd193_2', title: 'Словарь: Бизнес-лексика', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd193_3', title: 'Диалог: Опоздание на рейс', url: 'meng.html', icon: '💬', time: 15 }
+            ]},
+            { title: "День 194: Пропорции IV", tasks: [
+                { id: 'd194_1', title: 'Двойное сравнение (The more)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd194_2', title: 'Тренажер письма (Сложный)', url: 'reng.html', icon: '✍️', time: 20 },
+                { id: 'd194_3', title: 'Диалог: Ресторан и аллергия', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 195: Биномы IV", tasks: [
+                { id: 'd195_1', title: 'Английские биномы (C2)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd195_2', title: 'Словарь: Вся база C1-C2', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd195_3', title: 'Диалог: Коворкинг', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 196: Делегирование IV", tasks: [
+                { id: 'd196_1', title: 'Каузатив (Have smth done)', url: 'eng3.html', icon: '💎', time: 15 },
+                { id: 'd196_2', title: 'Тренажер письма (C1-C2)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd196_3', title: 'Диалог: Барбершоп', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 197: Литота IV", tasks: [
+                { id: 'd197_1', title: 'Литота (Understatement)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd197_2', title: 'Словарь: Идиомы', url: 'weng.html', icon: '📚', time: 15 },
+                { id: 'd197_3', title: 'Диалог: Автомойка', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 198: Пересказ IV", tasks: [
+                { id: 'd198_1', title: 'Косвенная речь (Reported)', url: 'eng4.html', icon: '🎯', time: 15 },
+                { id: 'd198_2', title: 'Тренажер письма (TED Talk)', url: 'reng.html', icon: '✍️', time: 25 },
+                { id: 'd198_3', title: 'Диалог: Стоматология', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 199: Фронтинг IV", tasks: [
+                { id: 'd199_1', title: 'Фронтинг (Акцент в речи)', url: 'eng5.html', icon: '👑', time: 15 },
+                { id: 'd199_2', title: 'Словарь: Экстремальный микс', url: 'weng.html', icon: '📚', time: 20 },
+                { id: 'd199_3', title: 'Диалог: Заказ у кондитера', url: 'meng.html', icon: '💬', time: 10 }
+            ]},
+            { title: "День 200: АБСОЛЮТНЫЙ ТРИУМФ", tasks: [
+                { id: 'd200_1', title: 'Архитектура TED Talk', url: 'eng5.html', icon: '👑', time: 20 },
+                { id: 'd200_2', title: 'Словарь: Абсолютный C2', url: 'weng.html', icon: '📚', time: 25 },
+                { id: 'd200_3', title: 'Тренажер письма (Абсолют)', url: 'reng.html', icon: '✍️', time: 35 }
+            ]}
+        ];
+
+        // Пул для бесконечного режима повторения (когда закончится LEARNING_PATH)
+        const REPETITION_POOL = [
+            { url: 'heng.html', icon: '📘', title: 'Повторение: Фонетика', time: 10 },
+            { url: 'weng.html', icon: '📚', title: 'Повторение: Словарь', time: 15 },
+            { url: 'reng.html', icon: '✍️', title: 'Повторение: Письмо', time: 20 },
+            { url: 'meng.html', icon: '💬', title: 'Повторение: Диалоги', time: 15 },
+            { url: 'eng.html', icon: '📐', title: 'Повторение: Синтаксис', time: 10 },
+            { url: 'eng2.html', icon: '⚡', title: 'Повторение: Беглость', time: 15 },
+            { url: 'eng3.html', icon: '💎', title: 'Повторение: Дипломатия', time: 15 },
+            { url: 'eng4.html', icon: '🎯', title: 'Повторение: Мастерство', time: 15 },
+            { url: 'eng5.html', icon: '👑', title: 'Повторение: Риторика C2', time: 15 }
+        ];
+
+        function getTodayString() { return new Date().toDateString(); }
+
+        // Форматирование миллисекунд в ММ:СС
+        function formatTime(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const m = Math.floor(totalSeconds / 60);
+            const s = totalSeconds % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // Форматирование миллисекунд в ЧЧ:ММ:СС (для кулдауна)
+        function formatCooldown(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Скрываем кнопку "Назад" на главном экране
-            if (typeof TMABridge !== 'undefined') {
-                TMABridge.hideBackButton();
-            }
-            updateHabitProgress();
+            if (typeof TMABridge !== 'undefined') TMABridge.hideBackButton();
+            initStreak();
+            renderPath();
         });
 
-        function openModule(url, title) {
-            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            currentLoadedUrl = url;
-            document.getElementById('frameTitle').innerText = title;
-            // Пробрасываем hash Telegram (initData) в iframe для работы на iOS
-            const hash = window.location.hash || '';
-            document.getElementById('appFrame').src = url + hash;
-            document.getElementById('frameOverlay').style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Защита от конфликта скролла при открытом модуле
+        function initStreak() {
+            const today = getTodayString();
+            let lastVisit = localStorage.getItem('eng_last_visit');
+            let streak = parseInt(localStorage.getItem('eng_streak')) || 0;
+
+            if (lastVisit !== today) {
+                if (lastVisit) {
+                    const diffTime = Math.abs(new Date(today) - new Date(lastVisit));
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                    if (diffDays === 1) streak += 1;
+                    else if (diffDays > 1) streak = 1;
+                } else {
+                    streak = 1;
+                }
+                localStorage.setItem('eng_last_visit', today);
+                localStorage.setItem('eng_streak', streak);
+            }
+            document.getElementById('streakBadge').innerHTML = `🔥 ${streak} дней подряд`;
+        }
+
+        function renderPath() {
+            if (cooldownInterval) clearInterval(cooldownInterval);
+
+            let currentStageIdx = parseInt(localStorage.getItem('eng_current_stage')) || 0;
+            let stageData;
+
+            if (currentStageIdx >= LEARNING_PATH.length) {
+                const daySeed = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+                stageData = {
+                    title: `День ${currentStageIdx + 1}: Поддержание формы`,
+                    tasks: [
+                        { id: `rep_${currentStageIdx}_1`, ...REPETITION_POOL[daySeed % REPETITION_POOL.length] },
+                        { id: `rep_${currentStageIdx}_2`, ...REPETITION_POOL[(daySeed + 1) % REPETITION_POOL.length] },
+                        { id: `rep_${currentStageIdx}_3`, ...REPETITION_POOL[(daySeed + 2) % REPETITION_POOL.length] }
+                    ]
+                };
+            } else {
+                stageData = LEARNING_PATH[currentStageIdx];
+            }
+
+            let doneTasks = JSON.parse(localStorage.getItem(`eng_stage_${currentStageIdx}_done`)) || [];
+            let progressTasks = JSON.parse(localStorage.getItem(`eng_stage_${currentStageIdx}_progress`)) || {};
+            let stageStartTime = parseInt(localStorage.getItem(`eng_stage_${currentStageIdx}_start`)) || 0;
+
+            const container = document.getElementById('dailyTasksContainer');
+            const progressText = document.getElementById('dailyProgressText');
+            const fillBar = document.getElementById('dailyFill');
             
-            // Показываем нативную кнопку "Назад" в Telegram, чтобы закрыть iframe
+            // ПРОВЕРКА НА ПОЛНОЕ ВЫПОЛНЕНИЕ И КУЛДАУН 24 ЧАСА
+            if (doneTasks.length === stageData.tasks.length) {
+                const timeSinceStart = Date.now() - stageStartTime;
+                
+                if (timeSinceStart >= COOLDOWN_MS) {
+                    // 24 часа прошло - переходим на следующий день
+                    localStorage.setItem('eng_current_stage', currentStageIdx + 1);
+                    return renderPath(); // Рекурсивный рендер нового дня
+                } else {
+                    // 24 часа еще НЕ прошло - показываем таймер ожидания
+                    document.getElementById('stageTitle').innerText = `⏳ Ожидание`;
+                    progressText.innerText = 'Выполнено';
+                    progressText.style.background = 'var(--pos-bg)';
+                    progressText.style.color = 'var(--pos)';
+                    fillBar.style.width = `100%`;
+
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 20px 10px;">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">🛡️</div>
+                            <div style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 6px;">Нейронные связи формируются</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 16px;">
+                                Вы отлично поработали! Мозгу нужен сон и время для усвоения материала. Следующий блок заданий откроется через:
+                            </div>
+                            <div id="cooldownTimer" style="font-size: 1.8rem; font-weight: 900; color: var(--gold); font-variant-numeric: tabular-nums;">
+                                ${formatCooldown(COOLDOWN_MS - timeSinceStart)}
+                            </div>
+                        </div>
+                    `;
+
+                    // Запускаем живой таймер
+                    cooldownInterval = setInterval(() => {
+                        const left = COOLDOWN_MS - (Date.now() - stageStartTime);
+                        if (left <= 0) {
+                            clearInterval(cooldownInterval);
+                            renderPath(); // Время вышло, рендерим заново (перекинет на след. день)
+                        } else {
+                            document.getElementById('cooldownTimer').innerText = formatCooldown(left);
+                        }
+                    }, 1000);
+                    return;
+                }
+            }
+
+            // ОБЫЧНЫЙ РЕНДЕР ЗАДАЧ
+            document.getElementById('stageTitle').innerText = `🎯 ${stageData.title}`;
+            container.innerHTML = '';
+            let completedCount = doneTasks.length;
+
+            stageData.tasks.forEach(task => {
+                const isDone = doneTasks.includes(task.id);
+                const savedProgressMs = progressTasks[task.id];
+                const isPaused = !isDone && savedProgressMs !== undefined;
+                
+                // Вычисляем, что писать под названием
+                let timeLabel = `~${task.time} мин`;
+                if (isPaused) timeLabel = `Осталось: ${formatTime(savedProgressMs)}`;
+                if (isDone) timeLabel = `Завершено`;
+
+                const btn = document.createElement('button');
+                btn.style.cssText = `
+                    background: ${isDone ? 'var(--pos-bg)' : (isPaused ? 'rgba(245, 158, 11, 0.1)' : '#111827')};
+                    border: 1px solid ${isDone ? 'var(--pos)' : (isPaused ? 'var(--gold)' : 'var(--card-border)')};
+                    color: ${isDone ? '#fff' : 'var(--text-main)'};
+                    border-radius: 12px; padding: 12px 16px; font-size: 0.9rem; font-weight: 700;
+                    display: flex; align-items: center; justify-content: space-between;
+                    cursor: pointer; transition: all 0.2s; text-align: left;
+                `;
+                
+                let iconRight = '▶️';
+                if (isDone) iconRight = '✅';
+                else if (isPaused) iconRight = '⏸️';
+
+                btn.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.2rem;">${task.icon}</span>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="${isDone ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${task.title}</span>
+                            <span style="font-size: 0.75rem; color: ${isPaused ? 'var(--gold)' : 'var(--text-muted)'}; font-weight: 600;">${timeLabel}</span>
+                        </div>
+                    </div>
+                    <span style="font-size: 1.2rem;">${iconRight}</span>
+                `;
+
+                btn.onclick = () => {
+                    if (!isDone) openModule(task);
+                    else if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+                };
+                container.appendChild(btn);
+            });
+
+            const pct = (completedCount / stageData.tasks.length) * 100;
+            fillBar.style.width = `${pct}%`;
+            progressText.innerText = `${completedCount} / ${stageData.tasks.length}`;
+            progressText.style.background = 'var(--primary-bg)';
+            progressText.style.color = 'var(--primary)';
+        }
+
+        function openModule(taskObj = null, freeUrl = null, freeTitle = null) {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            
+            if (taskObj) {
+                activeTask = taskObj;
+                currentLoadedUrl = taskObj.url;
+                document.getElementById('frameTitle').innerText = taskObj.title;
+                
+                let currentStageIdx = parseInt(localStorage.getItem('eng_current_stage')) || 0;
+                
+                // Если это первая открытая задача в этом дне - фиксируем время старта дня (для 24ч кулдауна)
+                let stageStartTime = parseInt(localStorage.getItem(`eng_stage_${currentStageIdx}_start`));
+                if (!stageStartTime) {
+                    localStorage.setItem(`eng_stage_${currentStageIdx}_start`, Date.now());
+                }
+
+                // Загружаем остаток времени или берем полное
+                let progressTasks = JSON.parse(localStorage.getItem(`eng_stage_${currentStageIdx}_progress`)) || {};
+                currentTaskRemainingMs = progressTasks[taskObj.id] !== undefined ? progressTasks[taskObj.id] : (taskObj.time * 60 * 1000);
+                
+                taskStartTime = Date.now(); // Запускаем таймер сессии
+            } else {
+                activeTask = null;
+                currentLoadedUrl = freeUrl;
+                document.getElementById('frameTitle').innerText = freeTitle;
+            }
+
+            const hash = window.location.hash || '';
+            document.getElementById('appFrame').src = currentLoadedUrl + hash;
+            document.getElementById('frameOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
             if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
                 window.Telegram.WebApp.BackButton.show();
-                // Привязываем закрытие модуля к нативной кнопке
                 window.Telegram.WebApp.BackButton.onClick(closeModuleNative);
             }
         }
@@ -298,91 +1504,67 @@
 
         function closeModule() {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
+            
             document.getElementById('frameOverlay').style.display = 'none';
             document.getElementById('appFrame').src = 'about:blank';
-            document.body.style.overflow = ''; // Восстанавливаем управление дашбордом
+            document.body.style.overflow = '';
             document.body.style.overflowY = 'auto';
             
-            // Скрываем нативную кнопку "Назад" и убираем обработчик
             if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
                 window.Telegram.WebApp.BackButton.hide();
                 window.Telegram.WebApp.BackButton.offClick(closeModuleNative);
             }
+
+            if (activeTask) {
+                const timeSpentMs = Date.now() - taskStartTime;
+                const timeLeftMs = currentTaskRemainingMs - timeSpentMs;
+                
+                if (timeLeftMs <= 0) {
+                    // Время вышло полностью - засчитываем
+                    handleTaskResult(true, activeTask.id, 0);
+                } else {
+                    // Вышел раньше - спрашиваем
+                    const minsLeft = Math.ceil(timeLeftMs / 60000);
+                    const msg = `Осталось еще ${minsLeft} мин.\nВы вышли раньше. Уверены, что полностью усвоили материал?`;
+                    
+                    if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.showConfirm) {
+                        window.Telegram.WebApp.showConfirm(msg, (agreed) => {
+                            handleTaskResult(agreed, activeTask.id, timeLeftMs);
+                        });
+                    } else {
+                        const agreed = confirm(msg);
+                        handleTaskResult(agreed, activeTask.id, timeLeftMs);
+                    }
+                }
+            }
         }
 
-        function closeModuleNative() {
-            closeModule();
-        }
-
-        function closeModule() {
-            if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
-            document.getElementById('frameOverlay').style.display = 'none';
-            document.getElementById('appFrame').src = 'about:blank';
+        function handleTaskResult(isMastered, taskId, timeLeftMs) {
+            let currentStageIdx = parseInt(localStorage.getItem('eng_current_stage')) || 0;
             
-            // Скрываем нативную кнопку "Назад" и убираем обработчик
-            if (typeof TMABridge !== 'undefined' && window.Telegram?.WebApp?.BackButton) {
-                window.Telegram.WebApp.BackButton.hide();
-                window.Telegram.WebApp.BackButton.offClick(closeModuleNative);
+            if (isMastered) {
+                // Засчитываем успех
+                let doneTasks = JSON.parse(localStorage.getItem(`eng_stage_${currentStageIdx}_done`)) || [];
+                if (!doneTasks.includes(taskId)) {
+                    doneTasks.push(taskId);
+                    localStorage.setItem(`eng_stage_${currentStageIdx}_done`, JSON.stringify(doneTasks));
+                    if (typeof TMABridge !== 'undefined') TMABridge.haptic('success');
+                }
+            } else {
+                // Ставим на паузу, сохраняем остаток времени
+                let progressTasks = JSON.parse(localStorage.getItem(`eng_stage_${currentStageIdx}_progress`)) || {};
+                progressTasks[taskId] = Math.max(0, timeLeftMs);
+                localStorage.setItem(`eng_stage_${currentStageIdx}_progress`, JSON.stringify(progressTasks));
             }
+            
+            activeTask = null;
+            renderPath(); // Перерисовываем UI
         }
 
         function openInNewTab() {
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
             if (currentLoadedUrl) {
                 window.open(currentLoadedUrl, '_blank');
-            }
-        }
-
-        // HABIT TRACKER & LOCAL STORAGE
-        function toggleHabit(num) {
-            if (typeof TMABridge !== 'undefined') TMABridge.haptic('medium');
-            const btn = document.getElementById(`h${num}`);
-            const icon = document.getElementById(`h${num}_icon`);
-            
-            // Toggle styles
-            let isDone = false;
-            if (btn.style.background === 'var(--pos-bg)') {
-                btn.style.background = '#111827';
-                btn.style.borderColor = 'var(--card-border)';
-                btn.style.color = 'var(--text-muted)';
-                isDone = false;
-            } else {
-                btn.style.background = 'var(--pos-bg)';
-                btn.style.borderColor = 'var(--pos)';
-                btn.style.color = '#fff';
-                isDone = true;
-            }
-            
-            icon.innerText = isDone ? '✅' : '⬜';
-            localStorage.setItem(`eng_habit_${num}`, isDone ? 'true' : 'false');
-            updateHabitProgress();
-        }
-
-        function updateHabitProgress() {
-            let done = 0;
-            for (let i = 1; i <= 4; i++) {
-                const btn = document.getElementById(`h${i}`);
-                const icon = document.getElementById(`h${i}_icon`);
-                if (localStorage.getItem(`eng_habit_${i}`) === 'true') {
-                    done++;
-                    btn.style.background = 'var(--pos-bg)';
-                    btn.style.borderColor = 'var(--pos)';
-                    btn.style.color = '#fff';
-                    icon.innerText = '✅';
-                } else {
-                    btn.style.background = '#111827';
-                    btn.style.borderColor = 'var(--card-border)';
-                    btn.style.color = 'var(--text-muted)';
-                    icon.innerText = '⬜';
-                }
-            }
-
-            const pct = (done / 4) * 100;
-            document.getElementById('habitFill').style.width = `${pct}%`;
-            document.getElementById('habitProgressText').innerText = `${done} / 4 выполнено`;
-
-            if (done === 4) {
-                document.getElementById('habitProgressText').innerText = '🎉 План на сегодня выполнен!';
             }
         }
     </script>
