@@ -256,6 +256,7 @@
         <div style="height: calc(50px + var(--sa-t)); padding-top: var(--sa-t); background: #111827; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; padding-left: calc(16px + var(--sa-l)); padding-right: calc(16px + var(--sa-r));">
             <div style="font-size: 0.9rem; font-weight: 800; color: #fff;" id="frameTitle">Модуль</div>
             <div style="display: flex; gap: 8px;">
+                <button style="background: #374151; border: 1px solid #f59e0b; color: #fbbf24; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer;" onclick="showManualTtsDebug()">🔍 Дебаг</button>
                 <button style="background: var(--primary); border: none; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer;" onclick="closeModule()">✕ Закрыть</button>
             </div>
         </div>
@@ -1576,6 +1577,64 @@
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
             if (currentLoadedUrl) {
                 window.open(currentLoadedUrl, '_blank');
+            }
+        }
+
+        // РУЧНОЙ ВЫЗОВ ДЕБАГА ОЗВУЧКИ
+        function showManualTtsDebug() {
+            if (typeof TMABridge !== 'undefined') TMABridge.haptic('medium');
+
+            // Проверяем синтезатор как в главном окне, так и во фрейме
+            let frameSynth = null;
+            try {
+                const iframe = document.getElementById('appFrame');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.speechSynthesis) {
+                    frameSynth = iframe.contentWindow.speechSynthesis;
+                }
+            } catch (e) {}
+
+            const synth = frameSynth || window.speechSynthesis;
+
+            if (!synth) {
+                alert("❌ speech-synthesis полностью отсутствует в объекте window!");
+                return;
+            }
+
+            try { synth.resume(); } catch (e) {}
+
+            const voices = synth.getVoices() || [];
+            const enVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en')).map(v => `${v.name} [${v.lang}]`);
+
+            const report = [
+                `🔍 ТЕХНИЧЕСКИЙ ОТЧЕТ TTS:`,
+                `📱 OS: ${/Android/i.test(navigator.userAgent) ? 'Android' : 'iOS / Desktop'}`,
+                `🔊 Статус: speaking=${synth.speaking}, paused=${synth.paused}, pending=${synth.pending}`,
+                `🌐 Всего голосов найдено: ${voices.length}`,
+                `🇺🇸 Английские голоса (${enVoices.length}):\n${enVoices.length > 0 ? enVoices.slice(0, 4).join('\n') : 'НЕТ ГОЛОСОВ'}`,
+                `\n▶️ Сейчас запустится тест звука фразы: "System test online".`
+            ].join('\n\n');
+
+            if (window.Telegram?.WebApp?.showAlert) {
+                window.Telegram.WebApp.showAlert(report);
+            } else {
+                alert(report);
+            }
+
+            // Тестовый запуск голоса с отслеживанием ошибок
+            try {
+                const utter = new SpeechSynthesisUtterance("System test online");
+                utter.lang = "en-US";
+                utter.rate = 0.9;
+                if (enVoices.length > 0) {
+                    utter.voice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+                }
+                utter.onstart = () => console.log("Test audio onstart fired!");
+                utter.onerror = (err) => {
+                    alert(`❌ Ошибка воспроизведения:\ncode: ${err.error}\nmessage: ${err.message || 'нет'}`);
+                };
+                synth.speak(utter);
+            } catch (err) {
+                alert(`❌ Исключение при speak(): ${err.message}`);
             }
         }
     </script>
