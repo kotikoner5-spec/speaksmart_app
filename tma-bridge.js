@@ -5,39 +5,60 @@
  */
 
 const TMABridge = (function () {
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    // На iOS в iframe Telegram WebApp доступен только через parent окно
+    const tg = (function() {
+        try {
+            if (window.parent && window.parent.Telegram && window.parent.Telegram.WebApp && window.parent.Telegram.WebApp.initData) {
+                return window.parent.Telegram.WebApp;
+            }
+        } catch (e) {}
+        return window.Telegram ? window.Telegram.WebApp : null;
+    })();
     
     // URL вашего Cloudflare Worker
     const API_URL = 'https://my-english-app.kotikoner5.workers.dev';
     
-    // Состояние пользователя
+    // Состояние пользователя и аудио-движка
     let isPremium = false;
     let audioUnlocked = false;
     let selectedEnglishVoice = null;
 
+    // Глобальная ссылка для предотвращения удаления объекта речи сборщиком мусора Android (GC Bug)
+    window._tmaActiveUtterance = null;
+
     // Инициализация и поиск доступных английских голосов (критично для Android)
+    function getSpeechSynth() {
+        try {
+            if (window.top && window.top.speechSynthesis) return window.top.speechSynthesis;
+        } catch (e) {}
+        return window.speechSynthesis || null;
+    }
+
+    // Инициализация и поиск доступных английских голосов (с поддержкой Android Chromium)
     function initEnglishVoices() {
-        if (!window.speechSynthesis) return;
-        const voices = window.speechSynthesis.getVoices();
+        const synth = getSpeechSynth();
+        if (!synth) return;
+        const voices = synth.getVoices();
         if (!voices || voices.length === 0) return;
 
-        selectedEnglishVoice = voices.find(v => v.lang === 'en-US' && !v.localService) ||
-                               voices.find(v => v.lang === 'en-US') ||
-                               voices.find(v => v.lang === 'en-GB') ||
-                               voices.find(v => v.lang.startsWith('en')) ||
+        selectedEnglishVoice = voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && !v.localService) ||
+                               voices.find(v => v.lang === 'en-US' || v.lang === 'en_US') ||
+                               voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB') ||
+                               voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en')) ||
                                null;
     }
 
-    if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = initEnglishVoices;
+    const sysSynth = getSpeechSynth();
+    if (sysSynth) {
+        sysSynth.onvoiceschanged = initEnglishVoices;
         initEnglishVoices();
     }
 
     // 1. РАЗБЛОКИРОВКА ЗВУКА НА iOS И ANDROID
     function unlockAudio() {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.resume();
+        const synth = getSpeechSynth();
+        if (!synth) return;
+        try { synth.resume(); } catch (e) {}
         initEnglishVoices();
         audioUnlocked = true;
         
@@ -117,32 +138,47 @@ const TMABridge = (function () {
 
         // Универсальная озвучка для всех смартфонов и ПК
         speak: function(text, rate = 0.88, onEndCallback = null) {
-            if (!window.speechSynthesis) return;
+            const synth = getSpeechSynth();
+            if (!synth) return;
 
-            const synth = window.speechSynthesis;
-            synth.resume();
-            synth.cancel();
+            try { synth.resume(); } catch (e) {}
 
-            // Задержка 15 мс обходит баг сброса очереди в WebKit / Android WebView
+            const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
+            if (!clean) return;
+
+            // На Android отменяем речь только если воспроизведение уже идет
+            if (synth.speaking || synth.pending) {
+                synth.cancel();
+            }
+
+            // Задержка 45 мс необходима Android Chromium для инициализации аудиопотока после cancel
             setTimeout(() => {
-                const clean = text.replace(/[^a-zA-Z0-9\s',.?!-]/g, ' ').trim();
-                if (!clean) return;
+                try { synth.resume(); } catch (e) {}
 
                 const utter = new SpeechSynthesisUtterance(clean);
                 utter.lang = 'en-US';
                 utter.rate = rate;
                 utter.pitch = 1.0;
+                utter.volume = 1.0;
 
                 if (!selectedEnglishVoice) initEnglishVoices();
-                if (selectedEnglishVoice) utter.voice = selectedEnglishVoice;
-
-                if (typeof onEndCallback === 'function') {
-                    utter.onend = onEndCallback;
-                    utter.onerror = onEndCallback;
+                if (selectedEnglishVoice) {
+                    utter.voice = selectedEnglishVoice;
                 }
 
+                // Защита для Android: сохраняем в window, чтобы V8 GC не уничтожил объект до окончания речи
+                window._tmaActiveUtterance = utter;
+
+                const finishHandler = () => {
+                    window._tmaActiveUtterance = null;
+                    if (typeof onEndCallback === 'function') onEndCallback();
+                };
+
+                utter.onend = finishHandler;
+                utter.onerror = finishHandler;
+
                 synth.speak(utter);
-            }, 15);
+            }, 45);
         },
 
         // Настройка кнопки "Назад"
@@ -194,7 +230,14 @@ const TMABridge = (function () {
             const btn = document.getElementById('paywallBtn');
             if (btn) btn.innerText = 'Создание счета...';
 
-            if (!tg || !tg.initDataUnsafe?.user) {
+            // На iOS берем инстанс Telegram из верхнего окна, где зарегистрирован нативный мост
+            const activeTg = (window.parent && window.parent.Telegram?.WebApp?.initData) 
+                ? window.parent.Telegram.WebApp 
+                : tg;
+
+            const activeInitData = activeTg?.initData || window.Telegram?.WebApp?.initData;
+
+            if (!activeTg || !activeInitData) {
                 alert("Оплата доступна только внутри Telegram.");
                 if (btn) btn.innerHTML = 'Разблокировать за <span class="paywall-btn-stars">399</span> ⭐️';
                 return;
@@ -205,21 +248,20 @@ const TMABridge = (function () {
                 const response = await fetch(`${API_URL}/create-stars-invoice`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ initData: tg.initData })
+                    body: JSON.stringify({ initData: activeInitData })
                 });
                 
                 const data = await response.json();
                 
                 if (data.invoiceUrl) {
-                    // Открываем нативное окно оплаты Telegram
-                    tg.openInvoice(data.invoiceUrl, (status) => {
+                    // Вызываем openInvoice у активного экземпляра (на iPhone вызовет плашку в основном окне)
+                    activeTg.openInvoice(data.invoiceUrl, (status) => {
                         if (status === 'paid') {
                             isPremium = true;
                             this.hidePaywall();
-                            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                            tg.showAlert('Оплата успешна! Полный доступ открыт навсегда. 🎉');
+                            if (activeTg.HapticFeedback) activeTg.HapticFeedback.notificationOccurred('success');
+                            activeTg.showAlert('Оплата успешна! Полный доступ открыт навсегда. 🎉');
                         } else {
-                            // status === 'cancelled' или 'failed'
                             if (btn) btn.innerHTML = 'Разблокировать за <span class="paywall-btn-stars">399</span> ⭐️';
                         }
                     });

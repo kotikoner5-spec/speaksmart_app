@@ -278,7 +278,9 @@
             if (typeof TMABridge !== 'undefined') TMABridge.haptic('light');
             currentLoadedUrl = url;
             document.getElementById('frameTitle').innerText = title;
-            document.getElementById('appFrame').src = url;
+            // Пробрасываем hash Telegram (initData) в iframe для работы на iOS
+            const hash = window.location.hash || '';
+            document.getElementById('appFrame').src = url + hash;
             document.getElementById('frameOverlay').style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Защита от конфликта скролла при открытом модуле
             
